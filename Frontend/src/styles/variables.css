@@ -1,0 +1,86 @@
+/* src/styles/variables.css */
+:root {
+    /* Color scheme */
+    --primary-color: #3498db;
+    --primary-color-dark: #2980b9;
+    --primary-color-light: #e1f0fa;
+    --primary-color-rgb: 52, 152, 219;
+    
+    --secondary-color: #2ecc71;
+    --secondary-color-dark: #27ae60;
+    --secondary-color-light: #e8f8f0;
+    
+    --accent-color: #e74c3c;
+    --accent-color-dark: #c0392b;
+    
+    /* Text colors */
+    --text-color: #333333;
+    --text-color-secondary: #666666;
+    --text-color-light: #999999;
+    
+    /* Background colors */
+    --background-color: #f8f9fa;
+    --background-color-light: #ffffff;
+    --card-background: #ffffff;
+    
+    /* Border colors */
+    --border-color: #e1e1e1;
+    --input-border: #ced4da;
+    
+    /* Form controls */
+    --input-background: #ffffff;
+    
+    /* Spacing */
+    --spacing-xs: 4px;
+    --spacing-sm: 8px;
+    --spacing-md: 16px;
+    --spacing-lg: 24px;
+    --spacing-xl: 32px;
+    
+    /* Shadows */
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.1);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease;
+    --transition-medium: 0.3s ease;
+    
+    /* Border radius */
+    --border-radius-sm: 4px;
+    --border-radius-md: 8px;
+    --border-radius-lg: 12px;
+    --border-radius-xl: 16px;
+  }
+  
+  /* Dark theme (to be implemented later) */
+  [data-theme="dark"] {
+    --primary-color: #3498db;
+    --primary-color-dark: #1d6fa5;
+    --primary-color-light: #1a3a4a;
+    --primary-color-rgb: 52, 152, 219;
+    
+    --secondary-color: #2ecc71;
+    --secondary-color-dark: #25a25a;
+    --secondary-color-light: #1a3a2c;
+    
+    --accent-color: #e74c3c;
+    --accent-color-dark: #b93d30;
+    
+    --text-color: #e1e1e1;
+    --text-color-secondary: #b0b0b0;
+    --text-color-light: #808080;
+    
+    --background-color: #121212;
+    --background-color-light: #1e1e1e;
+    --card-background: #1e1e1e;
+    
+    --border-color: #333333;
+    --input-border: #444444;
+    
+    --input-background: #2a2a2a;
+    
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.3);
+    --shadow-lg: 0 8px 16px rgba(0, 0, 0, 0.3);
+  }

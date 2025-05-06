@@ -1,0 +1,89 @@
+/* src/components/Layout/Navbar.css */
+.navbar-main {
+    background-color: var(--card-background);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 12px 0;
+  }
+  
+  .navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--primary-color);
+    font-weight: 700;
+    font-size: 1.5rem;
+    text-decoration: none;
+  }
+  
+  .navbar-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    transition: transform 0.3s ease;
+  }
+  
+  .navbar-brand:hover .navbar-logo {
+    transform: rotate(20deg);
+  }
+  
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-color);
+    margin: 0 8px;
+    position: relative;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+  }
+  
+  .nav-link.active {
+    color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.1);
+  }
+  
+  .nav-link:hover {
+    color: var(--primary-color);
+    background-color: rgba(var(--primary-color-rgb), 0.05);
+  }
+  
+  .nav-badge {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translate(25%, -25%);
+    font-size: 0.7rem;
+  }
+  
+  .logout-btn {
+    margin-left: 10px;
+    border-color: #dc3545;
+    color: #dc3545;
+    font-size: 0.9rem;
+    padding: 6px 12px;
+  }
+  
+  .logout-btn:hover {
+    background-color: #dc3545;
+    color: white;
+  }
+  
+  @media (max-width: 991px) {
+    .navbar-collapse {
+      margin-top: 15px;
+      padding: 10px;
+      background-color: var(--card-background);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .nav-link {
+      margin: 5px 0;
+    }
+    
+    .logout-btn {
+      margin: 10px 0;
+      width: 100%;
+    }
+  }
