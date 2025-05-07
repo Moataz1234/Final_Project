@@ -28,12 +28,12 @@ const Footer = () => {
               </div>
               <div className="d-flex align-items-center mb-2">
                 <Phone size={16} className="me-2" />
-                <span>+1 (555) 123-4567</span>
+                <span>+2 01149454541</span>
               </div>
-              <div className="d-flex align-items-center">
+              {/* <div className="d-flex align-items-center">
                 <MapPin size={16} className="me-2" />
                 <span>123 Cute Street, Adorable City</span>
-              </div>
+              </div> */}
             </div>
           </Col>
           
