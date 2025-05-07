@@ -1,147 +1,88 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { Form, Button, Container, Card, Alert } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
+import useCartStore from '../../store/cartStore';
+import useWishlistStore from '../../store/wishlistStore';
 import './auth.css';
 
 const LoginForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, loading, error, clearError } = useAuthStore();
+  const { syncCart } = useCartStore();
+  const { syncWishlist } = useWishlistStore();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Get redirect path from URL query params
+  const getRedirectPath = () => {
+    const searchParams = new URLSearchParams(location.search);
+    return searchParams.get('redirect') || '/';
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const success = await login({ email, password });
-    if (success) {
-      navigate('/');
+    try {
+      await login({ email, password });
+      // After successful login, sync cart and wishlist
+      await syncCart();
+      await syncWishlist();
+      navigate(getRedirectPath());
+    } catch (error) {
+      // Error is already handled in the store
+      console.error('Login failed:', error);
     }
   };
 
+  // Clear error when unmounting
+  useEffect(() => {
+    return () => clearError();
+  }, [clearError]);
+
   return (
-    <Container 
-      className="d-flex flex-column align-items-center justify-content-center" 
-      style={{ minHeight: '100vh', backgroundColor: 'var(--background-color)' }}
-    >
-      <Card 
-        className="w-100" 
-        style={{ 
-          maxWidth: '450px', 
-          backgroundColor: 'var(--card-background)', 
-          border: '1px solid var(--border-color)',
-          borderRadius: '16px',
-          color: 'var(--text-color)'
-        }}
-      >
-        <Card.Body className="p-4">
-          <h1 
-            className="text-center mb-3" 
-            style={{ color: 'var(--primary-color)' }}
-          >
-            MEEMII'S
-          </h1>
-          
-          <h2 
-            className="text-center mb-4" 
-            style={{ color: 'var(--primary-color)' }}
-          >
-            Sign In
-          </h2>
-          
-          <p className="text-center text-muted mb-4">
-            Welcome back! Please sign in to continue.
-          </p>
+    <div className="auth-container">
+      <form className="form" onSubmit={handleSubmit}>
+        <p className="title">Login</p>
+        <p className="message">Sign in to access your account.</p>
 
           {error && (
-            <Alert 
-              variant="danger" 
-              className="d-flex justify-content-between align-items-center"
-              dismissible
-              onClose={clearError}
-            >
-              {error}
-            </Alert>
-          )}
+          <div className="error-message">
+            {error}
+            <button type="button" onClick={clearError}>×</button>
+          </div>
+        )}
 
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-3">
-              <Form.Label 
-                style={{ 
-                  color: 'var(--text-color-secondary)', 
-                  fontWeight: 'bold' 
-                }}
-              >
-                Email
-              </Form.Label>
-              <Form.Control
+        <label>
+          <input 
                 type="email"
-                placeholder="Enter your email"
+            className="input" 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                style={{
-                  backgroundColor: 'var(--input-background)',
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-color)'
-                }}
               />
-            </Form.Group>
+          <span>Email</span>
+        </label>
 
-            <Form.Group className="mb-4">
-              <Form.Label 
-                style={{ 
-                  color: 'var(--text-color-secondary)', 
-                  fontWeight: 'bold' 
-                }}
-              >
-                Password
-              </Form.Label>
-              <Form.Control
+        <label>
+          <input 
                 type="password"
-                placeholder="Enter your password"
+            className="input" 
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                style={{
-                  backgroundColor: 'var(--input-background)',
-                  borderColor: 'var(--border-color)',
-                  color: 'var(--text-color)'
-                }}
-              />
-            </Form.Group>
+          />
+          <span>Password</span>
+        </label>
 
-            <Button 
-              type="submit" 
-              disabled={isLoading}
-              className="w-100 py-2"
-              style={{
-                backgroundColor: 'var(--primary-color)',
-                borderColor: 'var(--primary-color)',
-                fontWeight: 'bold'
-              }}
-            >
-              {isLoading ? 'Signing in...' : 'Sign In'}
-            </Button>
-          </Form>
+        <button className="submit" type="submit" disabled={loading}>
+          {loading ? 'Signing in...' : 'Sign in'}
+        </button>
 
-          <div className="text-center mt-4">
-            <span style={{ color: 'var(--text-color-secondary)' }}>
-              Don't have an account?{' '}
-              <Link 
-                to="/register" 
-                style={{ 
-                  color: 'var(--primary-color)', 
-                  textDecoration: 'none',
-                  fontWeight: 'bold'
-                }}
-              >
-                Sign up
-              </Link>
-            </span>
+        <p className="signin">
+          Don't have an account? <Link to="/register">Register</Link>
+        </p>
+      </form>
           </div>
-        </Card.Body>
-      </Card>
-    </Container>
   );
 };
 

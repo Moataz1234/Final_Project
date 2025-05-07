@@ -1,51 +1,11 @@
 // Updated HomePage.jsx with debounced search
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Card, Button, Form, InputGroup } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
+import { Container, Row, Col, Form, InputGroup } from 'react-bootstrap';
+import { Search } from 'lucide-react';
 import useProductStore from '../store/productStore';
-import useCartStore from '../store/cartStore';
-import useWishlistStore from '../store/wishlistStore';
-import { ShoppingCart, Heart, Search } from 'lucide-react';
-import styled from 'styled-components';
+import ProductCard from '../components/Products/ProductCard/ProductCard';
+import LoadingSpinner from '../components/UI/LoadingSpinner/LoadingSpinner';
 import './HomePage.css';
-
-const ProductGrid = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 40px;
-`;
-
-// Bouncing logo component for loading state
-const BouncingLogo = styled.div`
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 60px;
-  height: 50vh;
-  
-  img {
-    width: 150px;
-    height: auto;
-    animation: bounce 1s infinite alternate ease-in-out;
-  }
-  
-  p {
-    margin-top: 20px;
-    color: var(--primary-color);
-    font-size: 18px;
-  }
-  
-  @keyframes bounce {
-    from {
-      transform: translateY(0px);
-    }
-    to {
-      transform: translateY(-20px);
-    }
-  }
-`;
 
 // Debounce function
 const useDebounce = (value, delay) => {
@@ -73,9 +33,6 @@ const HomePage = () => {
     categories,
     fetchCategories 
   } = useProductStore();
-  
-  const { addItem: addToCart } = useCartStore();
-  const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -123,49 +80,21 @@ const HomePage = () => {
     setPriceRange(prev => ({ ...prev, [name]: value }));
   };
 
-  // Function to handle adding to cart
-  const handleAddToCart = (product) => {
-    addToCart(product, 1);
-    // You can add a toast notification here
-    console.log('Added to cart:', product.name);
-  };
-
-  // Function to handle wishlist toggle
-  const handleToggleWishlist = (product) => {
-    if (isInWishlist(product.id)) {
-      removeFromWishlist(product.id);
-    } else {
-      addToWishlist(product);
-    }
-  };
-
-  // Helper function to safely format price
-  const formatPrice = (price) => {
-    // Convert to number if it's a string
-    const numPrice = typeof price === 'string' ? parseFloat(price) : price;
-    
-    // Check if it's a valid number
-    return !isNaN(numPrice) ? numPrice.toFixed(2) : '0.00';
-  };
-
   // Custom loading component with bouncing logo
-  if (loading) return (
-    <BouncingLogo>
-      <img src="/assets/meemiis.png" alt="Loading..." />
-      <p>Loading amazing products for you...</p>
-    </BouncingLogo>
-  );
+  if (loading) {
+    return <LoadingSpinner text="Loading amazing products for you..." />;
+  }
   
   if (error) return (
     <div className="error-container">
       <h3>Error Loading Products</h3>
       <p>{error}</p>
-      <Button 
-        variant="primary" 
+      <button 
+        className="retry-button"
         onClick={() => fetchProducts({ featured: true })}
       >
         Try Again
-      </Button>
+      </button>
     </div>
   );
 
@@ -224,48 +153,11 @@ const HomePage = () => {
           <p>Try adjusting your filters or check back later for new items.</p>
         </div>
       ) : (
-        <ProductGrid>
+        <div className="product-grid">
           {products.map(product => (
-            <Card key={product.id} className="product-card h-100">
-              <Link to={`/products/${product.id}`} className="product-link">
-                <Card.Img 
-                  variant="top" 
-                  src={product.image_url || '/assets/placeholder.jpg'} 
-                  className="product-image"
-                />
-              </Link>
-              <Card.Body className="d-flex flex-column">
-                <Link to={`/products/${product.id}`} className="product-title-link">
-                  <Card.Title>{product.name}</Card.Title>
-                </Link>
-                <Card.Text className="product-description">
-                  {product.description && product.description.length > 100 
-                    ? `${product.description.substring(0, 100)}...` 
-                    : product.description}
-                </Card.Text>
-                <div className="d-flex justify-content-between align-items-center mt-auto">
-                  <h5 className="product-price mb-0">${formatPrice(product.price)}</h5>
-                  <div className="product-actions">
-                    <Button 
-                      variant={isInWishlist(product.id) ? "danger" : "outline-secondary"} 
-                      className="me-2 wishlist-btn"
-                      onClick={() => handleToggleWishlist(product)}
-                    >
-                      <Heart size={18} />
-                    </Button>
-                    <Button 
-                      variant="primary"
-                      className="cart-btn"
-                      onClick={() => handleAddToCart(product)}
-                    >
-                      <ShoppingCart size={18} /> Add
-                    </Button>
-                  </div>
-                </div>
-              </Card.Body>
-            </Card>
+            <ProductCard key={product.id} product={product} />
           ))}
-        </ProductGrid>
+        </div>
       )}
     </Container>
   );

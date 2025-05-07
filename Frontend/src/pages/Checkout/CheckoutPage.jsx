@@ -6,13 +6,13 @@ import { CreditCard, Truck, AlertCircle } from 'lucide-react';
 import useCartStore from '../../store/cartStore';
 import useOrderStore from '../../store/orderStore';
 import useAuthStore from '../../store/authStore';
-import LoadingSpinner from '../../components/UI/LoadingSpinner';
+import LoadingSpinner from '../../components/UI/LoadingSpinner/LoadingSpinner';
 import './CheckoutPage.css';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuthStore();
-  const { items, totalItems, totalPrice, clearCart, initialize } = useCartStore();
+  const { items, totalItems, totalAmount, clearCart, initialize } = useCartStore();
   const { placeOrder, loading, error } = useOrderStore();
   
   const [formData, setFormData] = useState({
@@ -26,19 +26,25 @@ const CheckoutPage = () => {
   const [validationErrors, setValidationErrors] = useState({});
   
   useEffect(() => {
-    // Fetch cart data
-    initialize();
-    
     // Redirect if not authenticated
     if (!isAuthenticated) {
-      navigate('/login?redirect=checkout');
+      navigate('/login?redirect=/checkout');
+      return;
     }
+    
+    // Initialize cart data
+    initialize();
     
     // Redirect if cart is empty
     if (totalItems === 0) {
       navigate('/cart');
     }
-  }, [isAuthenticated, totalItems]);
+  }, [isAuthenticated, totalItems, navigate, initialize]);
+  
+  // If not authenticated or loading cart, don't render anything
+  if (!isAuthenticated) {
+    return null;
+  }
   
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -115,10 +121,12 @@ const CheckoutPage = () => {
     }
   };
   
-  if (loading) return <LoadingSpinner text="Processing your order..." />;
+  if (loading) {
+    return <LoadingSpinner text="Processing your order..." />;
+  }
   
   // Calculate order summary
-  const subtotal = totalPrice;
+  const subtotal = totalAmount;
   const taxRate = 0.05; // 5% tax rate
   const taxAmount = subtotal * taxRate;
   const shippingCost = 10.00; // Flat shipping rate
@@ -290,7 +298,7 @@ const CheckoutPage = () => {
                     <div key={item.id} className="order-item">
                       <div className="item-info">
                         <span className="item-name">
-                          {item.product.name} x {item.quantity}
+                          {item.name} x {item.quantity}
                         </span>
                       </div>
                       <span className="item-price">

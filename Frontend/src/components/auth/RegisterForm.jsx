@@ -1,132 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import styled from 'styled-components';
 import useAuthStore from '../../store/authStore';
+import useCartStore from '../../store/cartStore';
+import useWishlistStore from '../../store/wishlistStore';
 import './auth.css';
-
-const PageWrapper = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: var(--background-color);
-  padding: 20px;
-`;
-
-const FormContainer = styled.div`
-  width: 100%;
-  max-width: 450px;
-  background-color: var(--card-background);
-  border-radius: 16px;
-  padding: 30px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-
-  @media (max-width: 480px) {
-    max-width: 100%;
-    padding: 20px;
-  }
-`;
-
-const Logo = styled.h1`
-  text-align: center;
-  color: var(--primary-color);
-  font-size: 2.5rem;
-  margin-bottom: 30px;
-  font-weight: bold;
-
-  @media (max-width: 480px) {
-    font-size: 2rem;
-  }
-`;
-
-const FormTitle = styled.h2`
-  color: var(--primary-color);
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 1.8rem;
-
-  @media (max-width: 480px) {
-    font-size: 1.5rem;
-  }
-`;
-
-const InputWrapper = styled.div`
-  display: flex;
-  gap: 15px;
-  margin-bottom: 15px;
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    gap: 10px;
-  }
-`;
-
-const Input = styled.input`
-  width: 100%;
-  padding: 12px 15px;
-  background-color: var(--input-background);
-  border: 1px solid var(--input-border);
-  border-radius: 8px;
-  color: var(--text-color);
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s ease;
-
-  &:focus {
-    border-color: var(--primary-color);
-  }
-
-  &::placeholder {
-    color: var(--text-color-secondary);
-  }
-`;
-
-const SubmitButton = styled.button`
-  width: 100%;
-  padding: 12px;
-  background-color: var(--primary-color);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: var(--primary-color-dark);
-  }
-
-  &:disabled {
-    background-color: var(--input-background);
-    cursor: not-allowed;
-  }
-`;
-
-const SignInLink = styled.div`
-  text-align: center;
-  margin-top: 20px;
-  color: var(--text-color-secondary);
-
-  a {
-    color: var(--primary-color);
-    text-decoration: none;
-    font-weight: bold;
-
-    &:hover {
-      text-decoration: underline;
-    }
-  }
-`;
-
-const ErrorMessage = styled.div`
-  background-color: #ff4444;
-  color: white;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  text-align: center;
-`;
 
 const RegisterForm = () => {
   const [formData, setFormData] = useState({
@@ -139,13 +16,15 @@ const RegisterForm = () => {
     password_confirmation: ''
   });
   
-  const { register, error, isLoading, clearError } = useAuthStore();
+  const { register, loading, error, clearError } = useAuthStore();
+  const { syncCart } = useCartStore();
+  const { syncWishlist } = useWishlistStore();
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-    clearError();
+    if (error) clearError();
   };
 
   const handleSubmit = async (e) => {
@@ -166,101 +45,129 @@ const RegisterForm = () => {
       password_confirmation: formData.password_confirmation
     };
 
-    const success = await register(userData);
-    if (success) {
+    try {
+      await register(userData);
+      // After successful registration, sync cart and wishlist
+      await syncCart();
+      await syncWishlist();
       navigate('/');
+    } catch (error) {
+      // Error is already handled in the store
+      console.error('Registration failed:', error);
     }
   };
 
+  // Clear error when unmounting
+  useEffect(() => {
+    return () => clearError();
+  }, [clearError]);
+
   return (
-    <PageWrapper>
-      <FormContainer>
-        <Logo>MEEMII'S</Logo>
-        <FormTitle>Register</FormTitle>
+    <div className="auth-container">
+      <form className="form" onSubmit={handleSubmit}>
+        <p className="title">Register</p>
+        <p className="message">Create your account to start shopping.</p>
 
-        {error && <ErrorMessage>{error}</ErrorMessage>}
+        {error && (
+          <div className="error-message">
+            {error}
+            <button type="button" onClick={clearError}>×</button>
+          </div>
+        )}
 
-        <form onSubmit={handleSubmit}>
-          <InputWrapper>
-            <Input
+        <div className="flex">
+          <label>
+            <input
               type="text"
               name="firstname"
-              placeholder="First name"
+              className="input"
               value={formData.firstname}
               onChange={handleChange}
               required
             />
-            <Input
+            <span>First Name</span>
+          </label>
+
+          <label>
+            <input
               type="text"
               name="lastname"
-              placeholder="Last name"
+              className="input"
               value={formData.lastname}
               onChange={handleChange}
               required
             />
-          </InputWrapper>
+            <span>Last Name</span>
+          </label>
+        </div>
 
-          <Input
+        <label>
+          <input
             type="email"
             name="email"
-            placeholder="Email address"
+            className="input"
             value={formData.email}
             onChange={handleChange}
             required
-            style={{ marginBottom: '15px' }}
           />
+          <span>Email</span>
+        </label>
 
-          <Input
+        <label>
+          <input
             type="tel"
             name="phone"
-            placeholder="Phone number (optional)"
+            className="input"
             value={formData.phone}
             onChange={handleChange}
-            style={{ marginBottom: '15px' }}
           />
+          <span>Phone (optional)</span>
+        </label>
 
-          <Input
+        <label>
+          <input
             type="text"
             name="address"
-            placeholder="Address (optional)"
+            className="input"
             value={formData.address}
             onChange={handleChange}
-            style={{ marginBottom: '15px' }}
           />
+          <span>Address (optional)</span>
+        </label>
 
-          <Input
+        <label>
+          <input
             type="password"
             name="password"
-            placeholder="Password"
+            className="input"
             value={formData.password}
             onChange={handleChange}
             required
-            style={{ marginBottom: '15px' }}
           />
+          <span>Password</span>
+        </label>
 
-          <Input
+        <label>
+          <input
             type="password"
             name="password_confirmation"
-            placeholder="Confirm password"
+            className="input"
             value={formData.password_confirmation}
             onChange={handleChange}
             required
-            style={{ marginBottom: '20px' }}
           />
+          <span>Confirm Password</span>
+        </label>
 
-          <SubmitButton 
-            type="submit" 
-            disabled={isLoading}
-          >
-            {isLoading ? 'Registering...' : 'Register'}
-          </SubmitButton>
-        </form>
+        <button className="submit" type="submit" disabled={loading}>
+          {loading ? 'Registering...' : 'Register'}
+        </button>
 
-        <SignInLink>
+        <p className="signin">
           Already have an account? <Link to="/login">Sign in</Link>
-        </SignInLink>
-      </FormContainer>
-    </PageWrapper>
+        </p>
+      </form>
+    </div>
   );
 };
 

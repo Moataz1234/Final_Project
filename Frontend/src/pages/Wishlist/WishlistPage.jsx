@@ -1,15 +1,25 @@
 // src/pages/Wishlist/WishlistPage.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { Heart, ShoppingCart, ArrowLeft, Trash2 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useWishlistStore from '../../store/wishlistStore';
 import useCartStore from '../../store/cartStore';
+import useAuthStore from '../../store/authStore';
 import './WishlistPage.css';
 
 const WishlistPage = () => {
   const { items, removeItem, clearWishlist } = useWishlistStore();
   const { addItem: addToCart } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/wishlist');
+    }
+  }, [isAuthenticated, navigate]);
 
   // Function to safely format price
   const formatPrice = (price) => {
@@ -28,6 +38,11 @@ const WishlistPage = () => {
     // Optional: Show a success toast notification
     console.log('Removed from wishlist:', productName);
   };
+
+  // If not authenticated, don't render anything (will redirect via useEffect)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (items.length === 0) {
     return (

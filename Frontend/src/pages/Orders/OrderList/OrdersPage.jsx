@@ -1,19 +1,28 @@
 // src/pages/Orders/OrdersPage.jsx
 import React, { useEffect, useState } from 'react';
 import { Container, Table, Badge, Button, Tab, Tabs } from 'react-bootstrap';
-import { Link } from 'react-router-dom';
-import { Calendar, Package, Info, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Calendar, Package, Info } from 'lucide-react';
 import useOrderStore from '../../../store/orderStore';
-import LoadingSpinner from '../../components/UI/LoadingSpinner';
+import useAuthStore from '../../../store/authStore';
+import LoadingSpinner from '../../../components/UI/LoadingSpinner/LoadingSpinner';
 import './OrdersPage.css';
 
 const OrdersPage = () => {
   const { orders, loading, error, fetchOrders } = useOrderStore();
+  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
   const [filter, setFilter] = useState('all');
   
   useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/orders');
+      return;
+    }
+    
     fetchOrders();
-  }, []);
+  }, [isAuthenticated, navigate, fetchOrders]);
   
   // Function to format date
   const formatDate = (dateString) => {
@@ -37,12 +46,19 @@ const OrdersPage = () => {
     }
   };
   
+  // If not authenticated, don't render anything (will redirect via useEffect)
+  if (!isAuthenticated) {
+    return null;
+  }
+  
   // Filter orders based on status
   const filteredOrders = filter === 'all' 
     ? orders 
     : orders.filter(order => order.status === filter);
   
-  if (loading) return <LoadingSpinner text="Loading your orders..." />;
+  if (loading) {
+    return <LoadingSpinner text="Loading your orders..." />;
+  }
   
   if (error) {
     return (

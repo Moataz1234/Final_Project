@@ -1,6 +1,7 @@
 // src/store/orderStore.jsx
 import { create } from 'zustand';
 import orderService from '../services/orderService';
+import useAuthStore from './authStore';
 
 const useOrderStore = create((set, get) => ({
   orders: [],
@@ -8,8 +9,35 @@ const useOrderStore = create((set, get) => ({
   loading: false,
   error: null,
   
+  // Initialize orders - call this when app loads
+  initialize: async () => {
+    // Skip API calls if not authenticated
+    if (!useAuthStore.getState().isAuthenticated) {
+      set({ orders: [], loading: false });
+      return;
+    }
+    
+    set({ loading: true, error: null });
+    try {
+      const orders = await orderService.getOrders();
+      set({
+        orders: orders || [],
+        loading: false
+      });
+    } catch (error) {
+      set({
+        error: error.response?.data?.message || 'Failed to fetch orders',
+        loading: false
+      });
+    }
+  },
+  
   // Fetch all orders for the user
   fetchOrders: async () => {
+    if (!useAuthStore.getState().isAuthenticated) {
+      return;
+    }
+
     set({ loading: true, error: null });
     try {
       const orders = await orderService.getOrders();
@@ -29,6 +57,10 @@ const useOrderStore = create((set, get) => ({
   
   // Fetch a single order by ID
   fetchOrderDetails: async (orderId) => {
+    if (!useAuthStore.getState().isAuthenticated) {
+      return;
+    }
+
     set({ loading: true, error: null });
     try {
       const order = await orderService.getOrderDetails(orderId);
@@ -48,6 +80,10 @@ const useOrderStore = create((set, get) => ({
   
   // Place a new order
   placeOrder: async (orderData) => {
+    if (!useAuthStore.getState().isAuthenticated) {
+      return;
+    }
+
     set({ loading: true, error: null });
     try {
       const response = await orderService.placeOrder(orderData);
@@ -73,6 +109,10 @@ const useOrderStore = create((set, get) => ({
   
   // Cancel an order
   cancelOrder: async (orderId) => {
+    if (!useAuthStore.getState().isAuthenticated) {
+      return;
+    }
+
     set({ loading: true, error: null });
     try {
       const response = await orderService.cancelOrder(orderId);

@@ -1,12 +1,15 @@
 // src/components/Products/ProductCard/ProductCard.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ShoppingCart, Heart } from 'lucide-react';
 import useCartStore from '../../../store/cartStore';
 import useWishlistStore from '../../../store/wishlistStore';
+import useAuthStore from '../../../store/authStore';
 import './ProductCard.css';
 
 const ProductCard = ({ product }) => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuthStore();
   const { addItem: addToCart } = useCartStore();
   const { addItem: addToWishlist, removeItem: removeFromWishlist, isInWishlist } = useWishlistStore();
   
@@ -22,55 +25,58 @@ const ProductCard = ({ product }) => {
   // Function to handle adding to cart
   const handleAddToCart = (e) => {
     e.preventDefault();
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/cart');
+      return;
+    }
     addToCart(product, 1);
-    
-    // Show confirmation toast
-    // You can implement a toast notification system later
-    console.log('Product added to cart:', product.name);
   };
 
   // Function to handle toggling wishlist
   const handleToggleWishlist = (e) => {
     e.preventDefault();
     
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/wishlist');
+      return;
+    }
+    
     if (productInWishlist) {
       removeFromWishlist(product.id);
-      console.log('Product removed from wishlist:', product.name);
     } else {
       addToWishlist(product);
-      console.log('Product added to wishlist:', product.name);
     }
   };
 
   return (
-    <Link to={`/products/${product.id}`} className="product-link">
-      <div className="product-card">
+    <div className="product-card">
+      <Link to={`/products/${product.id}`} className="product-link">
         <img 
           src={product.image_url || 'https://via.placeholder.com/300x300'}
           alt={product.name}
-          className="product-card__image"
+          className="product-image"
         />
-        <div className="product-card__info">
-          <h3 className="product-card__title">{product.name}</h3>
-          <p className="product-card__description">
+        <div className="product-info">
+          <h3 className="product-title">{product.name}</h3>
+          <p className="product-description">
             {product.description && product.description.length > 100 
               ? `${product.description.substring(0, 100)}...` 
               : product.description}
           </p>
-          <div className="product-card__price-actions">
-            <span className="product-card__price">
+          <div className="product-price-actions">
+            <span className="product-price">
               ${formatPrice(product.price)}
             </span>
-            <div className="product-card__actions">
+            <div className="product-actions">
               <button 
-                className={`product-card__action-btn ${productInWishlist ? 'active' : ''}`}
+                className={`wishlist-btn ${productInWishlist ? 'active' : ''}`}
                 onClick={handleToggleWishlist}
                 aria-label={productInWishlist ? "Remove from wishlist" : "Add to wishlist"}
               >
-                <Heart size={18} />
+                <Heart size={18} fill={productInWishlist ? "#ff6b9e" : "none"} />
               </button>
               <button 
-                className="product-card__add-to-cart"
+                className="add-to-cart-btn"
                 onClick={handleAddToCart}
                 aria-label="Add to cart"
               >
@@ -79,8 +85,8 @@ const ProductCard = ({ product }) => {
             </div>
           </div>
         </div>
-      </div>
-    </Link>
+      </Link>
+    </div>
   );
 };
 

@@ -6,6 +6,9 @@ import ProductsPage from './pages/Products/Product/ProductPage';
 // import ProductDetailPage from './pages/Products/ProductDetails/ProductDetailsPage';
 import CartPage from './pages/Cart/CartPage';
 import WishlistPage from './pages/Wishlist/WishlistPage';
+import OrdersPage from './pages/Orders/OrderList/OrdersPage';
+import OrderDetailsPage from './pages/Orders/OrderDetails/OrderDetailsPage';
+import CheckoutPage from './pages/Checkout/CheckoutPage';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 // import ProfilePage from './pages/Profile/ProfilePage';
@@ -25,23 +28,25 @@ const App = () => {
       <div className="app-container">
         <Header />
         <main className="main-content">
-          <Routes>
+        <Routes>
             {/* Public routes with main layout */}
-            <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<HomePage />} />
             <Route path="/products" element={<ProductsPage />} />
             {/* <Route path="products/:id" element={<ProductDetailPage />} /> */}
-            <Route path="/cart" element={<CartPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
             {/* <Route path="*" element={<NotFoundPage />} /> */}
-
-            {/* Protected routes */}
-            <Route element={<ProtectedRoute />}>
+          
+          {/* Protected routes */}
+          <Route element={<ProtectedRoute />}>
+              <Route path="/cart" element={<CartPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/orders/:id" element={<OrderDetailsPage />} />
               {/* <Route path="profile" element={<ProfilePage />} /> */}
-              {/* <Route path="orders" element={<OrdersPage />} /> */}
-            </Route>
-          </Routes>
+          </Route>
+        </Routes>
         </main>
         <Footer />
       </div>

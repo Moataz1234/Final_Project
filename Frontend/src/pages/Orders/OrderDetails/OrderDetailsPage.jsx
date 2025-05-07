@@ -3,18 +3,31 @@ import React, { useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Card, Table, Badge, Button } from 'react-bootstrap';
 import { ArrowLeft, Truck, Calendar, CreditCard, MapPin, AlertCircle } from 'lucide-react';
-import useOrderStore from '../../store/orderStore';
-import LoadingSpinner from '../../components/UI/LoadingSpinner';
-import './OrderDetailPage.css';
+import useOrderStore from '../../../store/orderStore';
+import useAuthStore from '../../../store/authStore';
+import LoadingSpinner from '../../../components/UI/LoadingSpinner/LoadingSpinner';
+import './OrderDetailsPage.css';
 
 const OrderDetailPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { currentOrder, loading, error, fetchOrderDetails, cancelOrder } = useOrderStore();
+  const { isAuthenticated } = useAuthStore();
   
   useEffect(() => {
+    // Redirect if not authenticated
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/orders');
+      return;
+    }
+    
     fetchOrderDetails(id);
-  }, [id]);
+  }, [id, isAuthenticated, navigate, fetchOrderDetails]);
+  
+  // If not authenticated, don't render anything
+  if (!isAuthenticated) {
+    return null;
+  }
   
   // Function to format date
   const formatDate = (dateString) => {
@@ -49,7 +62,9 @@ const OrderDetailPage = () => {
     }
   };
   
-  if (loading) return <LoadingSpinner text="Loading order details..." />;
+  if (loading) {
+    return <LoadingSpinner text="Loading order details..." />;
+  }
   
   if (error) {
     return (

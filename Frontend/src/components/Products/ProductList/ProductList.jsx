@@ -1,43 +1,9 @@
-// src/components/Products/ProductList.jsx
+// src/components/Products/ProductList/ProductList.jsx
 import React from 'react';
 import ProductCard from '../ProductCard/ProductCard';
-import LoadingSpinner from '../../UI/LoadingSpinner/LoadingSpinner';
 import useProductStore from '../../../store/productStore';
 import { Pagination } from 'react-bootstrap';
-import styled from 'styled-components';
 import './ProductList.css';
-
-const ProductGridContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-`;
-
-const EmptyState = styled.div`
-  text-align: center;
-  padding: 40px;
-  background-color: var(--card-background);
-  border-radius: 8px;
-  margin: 20px 0;
-`;
-
-const StyledPagination = styled(Pagination)`
-  justify-content: center;
-  margin-top: 30px;
-  
-  .page-item .page-link {
-    background-color: var(--card-background);
-    border-color: var(--border-color);
-    color: var(--text-color);
-  }
-  
-  .page-item.active .page-link {
-    background-color: var(--primary-color);
-    border-color: var(--primary-color);
-    color: white;
-  }
-`;
 
 const ProductList = () => {
   const { 
@@ -129,13 +95,13 @@ const ProductList = () => {
     return items;
   };
 
-  if (loading) return <LoadingSpinner text="Loading products..." />;
+  if (loading) return <div className="loading-spinner">Loading...</div>;
   if (error) return <div className="error-message">Error: {error}</div>;
 
   return (
     <div className="product-list-container">
       {products.length === 0 ? (
-        <EmptyState>
+        <div className="no-products">
           <h3>No products found</h3>
           <p>Try changing your search criteria or browse all products.</p>
           <button 
@@ -146,19 +112,19 @@ const ProductList = () => {
           >
             View All Products
           </button>
-        </EmptyState>
+        </div>
       ) : (
         <>
-          <ProductGridContainer>
+          <div className="product-grid">
             {products.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
-          </ProductGridContainer>
+          </div>
           
           {totalPages > 1 && (
-            <StyledPagination>
-              {renderPaginationItems()}
-            </StyledPagination>
+            <div className="pagination-container">
+              <Pagination>{renderPaginationItems()}</Pagination>
+            </div>
           )}
         </>
       )}

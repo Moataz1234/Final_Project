@@ -1,11 +1,11 @@
 // src/pages/auth/RegisterPage.jsx
 import React from 'react';
-import { Link } from 'react-router-dom';
 import RegisterForm from '../../components/auth/RegisterForm';
+import './AuthPages.css';
 
 const RegisterPage = () => {
   return (
-    <div className="container mx-auto">
+    <div className="auth-page-container">
       <RegisterForm />
     </div>
   );

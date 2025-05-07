@@ -1,19 +1,34 @@
 // src/pages/Cart/CartPage.jsx
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Container, Table, Button, Form, Row, Col, Card } from 'react-bootstrap';
 import { Trash2, ShoppingBag, ArrowLeft } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useCartStore from '../../store/cartStore';
+import useAuthStore from '../../store/authStore';
 import './CartPage.css';
 
 const CartPage = () => {
-  const { items, totalItems, totalPrice, updateQuantity, removeItem, clearCart } = useCartStore();
+  const { items, totalItems, totalAmount, updateItemQuantity, removeItem, clearCart } = useCartStore();
+  const { isAuthenticated } = useAuthStore();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    // Redirect to login if not authenticated
+    if (!isAuthenticated) {
+      navigate('/login?redirect=/cart');
+    }
+  }, [isAuthenticated, navigate]);
 
   // Function to safely format price
   const formatPrice = (price) => {
     const numPrice = typeof price === 'string' ? parseFloat(price) : price;
     return !isNaN(numPrice) ? numPrice.toFixed(2) : '0.00';
   };
+
+  // If not authenticated, don't render anything (will redirect via useEffect)
+  if (!isAuthenticated) {
+    return null;
+  }
 
   if (items.length === 0) {
     return (
@@ -67,7 +82,7 @@ const CartPage = () => {
                       type="number"
                       min="1"
                       value={item.quantity}
-                      onChange={(e) => updateQuantity(item.id, parseInt(e.target.value))}
+                      onChange={(e) => updateItemQuantity(item.id, parseInt(e.target.value))}
                       className="quantity-input"
                     />
                   </td>
@@ -111,7 +126,7 @@ const CartPage = () => {
               </div>
               <div className="summary-item">
                 <span>Subtotal:</span>
-                <span>${formatPrice(totalPrice)}</span>
+                <span>${formatPrice(totalAmount)}</span>
               </div>
               <div className="summary-item">
                 <span>Shipping:</span>
@@ -119,15 +134,16 @@ const CartPage = () => {
               </div>
               <div className="summary-total">
                 <span>Total:</span>
-                <span>${formatPrice(totalPrice)}</span>
+                <span>${formatPrice(totalAmount)}</span>
               </div>
-              <Button 
-                variant="primary" 
-                className="checkout-btn"
-                onClick={() => console.log('Proceed to checkout')}
-              >
-                Proceed to Checkout
-              </Button>
+              <Link to="/checkout">
+                <Button 
+                  variant="primary" 
+                  className="checkout-btn"
+                >
+                  Proceed to Checkout
+                </Button>
+              </Link>
             </Card.Body>
           </Card>
         </Col>

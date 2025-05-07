@@ -2,10 +2,11 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import LoginForm from '../../components/auth/LoginForm';
+import './AuthPages.css';
 
 const LoginPage = () => {
   return (
-    <div className="container mx-auto">
+    <div className="auth-page-container">
       <LoginForm />
       {/* <p className="text-center mt-4">
         Don't have an account? 
