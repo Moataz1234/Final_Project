@@ -8,6 +8,7 @@ import useOrderStore from '../../store/orderStore';
 import useAuthStore from '../../store/authStore';
 import LoadingSpinner from '../../components/UI/LoadingSpinner/LoadingSpinner';
 import './CheckoutPage.css';
+import { showSuccessToast, showErrorToast } from '../../utils/notifications';
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const CheckoutPage = () => {
   
   const [useSameAddress, setUseSameAddress] = useState(true);
   const [validationErrors, setValidationErrors] = useState({});
+  const [processingOrder, setProcessingOrder] = useState(false);
   
   useEffect(() => {
     // Redirect if not authenticated
@@ -34,14 +36,16 @@ const CheckoutPage = () => {
     
     // Initialize cart data
     initialize();
-    
-    // Redirect if cart is empty
-    if (totalItems === 0) {
+  }, [isAuthenticated, navigate, initialize]);
+  
+  // Redirect only if not processing order and cart is empty
+  useEffect(() => {
+    if (!processingOrder && totalItems === 0 && !loading) {
       navigate('/cart');
     }
-  }, [isAuthenticated, totalItems, navigate, initialize]);
+  }, [totalItems, navigate, processingOrder, loading]);
   
-  // If not authenticated or loading cart, don't render anything
+  // If not authenticated, don't render anything
   if (!isAuthenticated) {
     return null;
   }
@@ -97,8 +101,12 @@ const CheckoutPage = () => {
     e.preventDefault();
     
     if (!validateForm()) {
+      showErrorToast('Please fix the validation errors before proceeding.');
       return;
     }
+    
+    // Set processing order flag to prevent navigation during checkout
+    setProcessingOrder(true);
     
     // Prepare order data
     const orderData = {
@@ -110,14 +118,19 @@ const CheckoutPage = () => {
     try {
       const response = await placeOrder(orderData);
       
+      // Show success notification
+      showSuccessToast('Your order has been placed successfully!');
+      
       // Clear the cart after successful order
       clearCart();
       
-      // Redirect to order success page
+      // Navigate to order success page
       navigate(`/orders/${response.order.id}?success=true`);
     } catch (error) {
       console.error('Error placing order:', error);
+      showErrorToast('There was an error placing your order. Please try again.');
       // Error handling is managed by the store
+      setProcessingOrder(false);
     }
   };
   
@@ -331,9 +344,9 @@ const CheckoutPage = () => {
                   type="submit" 
                   variant="primary" 
                   className="place-order-btn"
-                  disabled={loading}
+                  disabled={loading || processingOrder}
                 >
-                  {loading ? 'Processing...' : 'Place Order'}
+                  {loading || processingOrder ? 'Processing...' : 'Place Order'}
                 </Button>
               </Card.Body>
             </Card>

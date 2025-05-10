@@ -1,0 +1,82 @@
+/* Custom styles for SweetAlert2 */
+
+.swal2-popup {
+  font-family: var(--font-family-base, 'Nunito', sans-serif);
+  border-radius: var(--border-radius-lg, 12px);
+  padding: 1.5rem;
+}
+
+.swal2-title {
+  font-weight: var(--font-weight-bold, 700);
+  color: var(--text-color, #333);
+}
+
+.swal2-html-container {
+  font-size: var(--font-size-md, 16px);
+  color: var(--text-color-secondary, #666);
+}
+
+.swal2-confirm {
+  background: var(--primary-gradient, linear-gradient(45deg, #ff6b9e, #ff9a7b)) !important;
+  border-radius: var(--border-radius-md, 8px) !important;
+  font-weight: var(--font-weight-semibold, 600) !important;
+  padding: 0.5rem 1.5rem !important;
+}
+
+.swal2-cancel {
+  background: var(--background-color-light, #f5f5f5) !important;
+  color: var(--text-color, #333) !important;
+  border-radius: var(--border-radius-md, 8px) !important;
+  font-weight: var(--font-weight-semibold, 600) !important;
+  padding: 0.5rem 1.5rem !important;
+}
+
+/* Toast styles */
+.swal2-toast {
+  box-shadow: var(--shadow-lg, 0 10px 25px -5px rgba(0, 0, 0, 0.1)) !important;
+}
+
+.swal2-toast .swal2-title {
+  font-size: var(--font-size-md, 16px) !important;
+  font-weight: var(--font-weight-semibold, 600) !important;
+}
+
+.swal2-toast .swal2-html-container {
+  font-size: var(--font-size-sm, 14px) !important;
+}
+
+/* Success icon */
+.swal2-success-circular-line-left,
+.swal2-success-circular-line-right,
+.swal2-success-fix {
+  background-color: transparent !important;
+}
+
+.swal2-success-ring {
+  border-color: rgba(255, 107, 158, 0.3) !important;
+}
+
+.swal2-icon.swal2-success [class^='swal2-success-line'] {
+  background-color: var(--primary-color, #ff6b9e) !important;
+}
+
+/* Error icon */
+.swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+  background-color: #f27474 !important;
+}
+
+/* Animation */
+.swal2-popup.swal2-toast.swal2-show {
+  animation: swal2-toast-show 0.5s !important;
+}
+
+@keyframes swal2-toast-show {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+} 

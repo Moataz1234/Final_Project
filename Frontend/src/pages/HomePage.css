@@ -204,4 +204,189 @@
 
 .no-products p {
   color: var(--text-color-secondary);
+}
+
+/* Homepage Styles */
+.homepage {
+  min-height: 100vh;
+}
+
+/* Hero Section */
+.hero-section {
+  /* height: 60vh; */
+  min-height: 400px;
+  background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+              url('https://cdn.shopify.com/s/files/1/1857/6931/files/bath-_-body-works_600x600.jpg?v=1665645872');
+  background-size: cover;
+  background-position: center;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.hero-content {
+  max-width: 800px;
+  padding: 0 20px;
+}
+
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+  color: white;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.hero-content p {
+  font-size: 1.25rem;
+  margin-bottom: 30px;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.hero-button {
+  padding: 12px 30px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Featured Products Section */
+.featured-products-section {
+  margin-bottom: 70px;
+}
+
+.section-title {
+  margin-bottom: 40px;
+  font-weight: 600;
+  color: var(--primary-color);
+}
+
+/* Skeleton Loading Animation */
+.product-card-skeleton {
+  background-color: var(--card-background);
+  border-radius: 8px;
+  padding: 20px;
+  height: 350px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.skeleton-img {
+  background-color: var(--background-color-light);
+  border-radius: 8px;
+  height: 200px;
+  margin-bottom: 15px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeleton-title {
+  background-color: var(--background-color-light);
+  height: 24px;
+  width: 80%;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeleton-price {
+  background-color: var(--background-color-light);
+  height: 20px;
+  width: 40%;
+  margin-bottom: 15px;
+  border-radius: 4px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeleton-btn {
+  background-color: var(--background-color-light);
+  height: 40px;
+  width: 100%;
+  border-radius: 4px;
+  margin-top: auto;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    opacity: 0.6;
+  }
+}
+
+/* Categories Showcase */
+.categories-showcase {
+  padding: 50px 0;
+  background-color: var(--background-color-light);
+  margin-bottom: 50px;
+}
+
+.category-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+}
+
+.category-card {
+  display: block;
+  text-decoration: none;
+  color: var(--text-color);
+  background-color: var(--card-background);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: var(--shadow-sm);
+}
+
+.category-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-md);
+  color: var(--text-color);
+}
+
+.category-img {
+  height: 200px;
+  background-size: cover;
+  background-position: center;
+}
+
+.clothing-img {
+  background-image: url('https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');
+}
+
+.accessories-img {
+  background-image: url('https://images.unsplash.com/photo-1549037941-38a3a4aa15a9?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');
+}
+
+.decor-img {
+  background-image: url('https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80');
+}
+
+.category-card h3 {
+  padding: 15px;
+  margin: 0;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+  
+  .hero-content p {
+    font-size: 1rem;
+  }
+  
+  .category-cards {
+    grid-template-columns: 1fr;
+  }
 } 

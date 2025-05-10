@@ -1,30 +1,41 @@
 // src/store/authStore.jsx
 import { create } from 'zustand';
 import authService from '../services/authService';
+import { showSuccessToast, showErrorToast } from '../utils/notifications';
 
 const useAuthStore = create((set, get) => ({
-  user: authService.getCurrentUser(),
-  isAuthenticated: authService.isAuthenticated(),
-  loading: false,
+  user: null, // Don't initialize from localStorage
+  isAuthenticated: false, // Don't initialize from localStorage
+  loading: true, // Start with loading true
   error: null,
   
-  // Register a new user
-  register: async (userData) => {
-    set({ loading: true, error: null });
+  // Initialize auth state by checking with server
+  initializeAuth: async () => {
+    set({ loading: true });
     try {
-      const response = await authService.register(userData);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        set({ user: null, isAuthenticated: false, loading: false });
+        return;
+      }
+      
+      // Verify token with server and get user data
+      const user = await authService.getProfile();
       set({
-        user: response.user,
+        user,
         isAuthenticated: true,
         loading: false
       });
-      return response;
     } catch (error) {
+      // Token is invalid or expired
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       set({
-        error: error.response?.data?.message || 'Registration failed',
-        loading: false
+        user: null,
+        isAuthenticated: false,
+        loading: false,
+        error: null
       });
-      throw error;
     }
   },
   
@@ -33,17 +44,25 @@ const useAuthStore = create((set, get) => ({
     set({ loading: true, error: null });
     try {
       const response = await authService.login(credentials);
+      // Only store the token, not the user data
+      localStorage.setItem('token', response.access_token);
+      
+      // Fetch fresh user data from server
+      const user = await authService.getProfile();
       set({
-        user: response.user,
+        user,
         isAuthenticated: true,
         loading: false
       });
+      showSuccessToast(`Welcome back, ${user.name}!`);
       return response;
     } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Login failed';
       set({
-        error: error.response?.data?.message || 'Login failed',
+        error: errorMessage,
         loading: false
       });
+      showErrorToast(errorMessage);
       throw error;
     }
   },
@@ -53,17 +72,38 @@ const useAuthStore = create((set, get) => ({
     set({ loading: true });
     try {
       await authService.logout();
+      localStorage.removeItem('token');
+      localStorage.removeItem('user'); // Remove cached user data
       set({
         user: null,
         isAuthenticated: false,
         loading: false,
         error: null
       });
+      showSuccessToast('You have been logged out successfully');
     } catch (error) {
+      // Even if logout fails, clear local data
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
       set({
-        error: error.response?.data?.message || 'Logout failed',
+        user: null,
+        isAuthenticated: false,
         loading: false
       });
+      showErrorToast('Logout completed');
+    }
+  },
+  
+  // Fetch fresh user data from server
+  refreshUserData: async () => {
+    if (!get().isAuthenticated) return;
+    
+    try {
+      const user = await authService.getProfile();
+      set({ user });
+      return user;
+    } catch (error) {
+      console.error('Failed to refresh user data:', error);
       throw error;
     }
   },
@@ -78,10 +118,12 @@ const useAuthStore = create((set, get) => ({
       set({ user, loading: false });
       return user;
     } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to fetch profile';
       set({
-        error: error.response?.data?.message || 'Failed to fetch profile',
+        error: errorMessage,
         loading: false
       });
+      showErrorToast(errorMessage);
       throw error;
     }
   },
@@ -95,12 +137,15 @@ const useAuthStore = create((set, get) => ({
         user: response.user,
         loading: false
       });
+      showSuccessToast('Your profile has been updated successfully');
       return response;
     } catch (error) {
+      const errorMessage = error.response?.data?.message || 'Failed to update profile';
       set({
-        error: error.response?.data?.message || 'Failed to update profile',
+        error: errorMessage,
         loading: false
       });
+      showErrorToast(errorMessage);
       throw error;
     }
   },

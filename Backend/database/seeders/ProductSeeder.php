@@ -34,7 +34,7 @@ class ProductSeeder extends Seeder
                 'description' => 'High quality product for your wellness and care.',
                 'price' => $price,
                 'category_id' => $category_id,
-                'image_url' => "C:\\Users\\hp\\Desktop\\EraSoft_Frontend\\Projects\\Final_Project\\Frontend\\src\\assets\\product_{$i}.jpeg",
+                'image_url' => "Products\product_{$i}.jpeg",
                 'stock' => rand(10, 200),
                 'is_featured' => $i % 5 === 0,
                 'ingredients' => 'Natural ingredients blend',

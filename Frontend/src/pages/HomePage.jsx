@@ -1,7 +1,8 @@
 // Updated HomePage.jsx with debounced search
 import React, { useEffect, useState } from 'react';
-import { Container, Row, Col, Form, InputGroup } from 'react-bootstrap';
+import { Container, Row, Col, Form, InputGroup, Button } from 'react-bootstrap';
 import { Search } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import useProductStore from '../store/productStore';
 import ProductCard from '../components/Products/ProductCard/ProductCard';
 import LoadingSpinner from '../components/UI/LoadingSpinner/LoadingSpinner';
@@ -31,7 +32,9 @@ const HomePage = () => {
     error, 
     fetchProducts, 
     categories,
-    fetchCategories 
+    fetchCategories,
+    featuredProducts,
+    fetchFeaturedProducts
   } = useProductStore();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -44,16 +47,18 @@ const HomePage = () => {
   const debouncedPriceMin = useDebounce(priceRange.min, 500);
   const debouncedPriceMax = useDebounce(priceRange.max, 500);
 
-  // Initial data fetch
+  // Initial data fetch once on component mount
   useEffect(() => {
+    // Fetch categories for filters (if needed)
     fetchCategories();
     
-    // Load initial products without filters
-    fetchProducts({ 
-      featured: true
-    });
-  }, []);
-  
+    // Fetch a limited set of featured products for homepage
+    fetchFeaturedProducts(8); // Fetch only 8 featured products for the homepage
+  }, [fetchCategories, fetchFeaturedProducts]);
+
+  // Show a subset of products or loading state
+  const displayProducts = featuredProducts || [];
+
   // Only fetch when debounced values change
   useEffect(() => {
     if (debouncedSearch !== '' || debouncedCategory !== '' || debouncedPriceMin !== '' || debouncedPriceMax !== '') {
@@ -99,67 +104,101 @@ const HomePage = () => {
   );
 
   return (
-    <Container className="mt-4 home-container">
-      <Row className="mb-4">
-        <Col md={4}>
-          <InputGroup className="search-group">
-            <InputGroup.Text><Search size={20} /></InputGroup.Text>
-            <Form.Control
-              placeholder="Search products..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-            />
-          </InputGroup>
-        </Col>
-        <Col md={4}>
-          <Form.Select 
-            value={selectedCategory}
-            onChange={handleCategoryChange}
-            className="category-select"
-          >
-            <option value="">All Categories</option>
-            {categories.map(category => (
-              <option key={category.id} value={category.slug}>
-                {category.name}
-              </option>
-            ))}
-          </Form.Select>
-        </Col>
-        <Col md={4}>
-          <InputGroup className="price-group">
-            <Form.Control
-              type="number"
-              placeholder="Min Price"
-              name="min"
-              value={priceRange.min}
-              onChange={handlePriceChange}
-            />
-            <Form.Control
-              type="number"
-              placeholder="Max Price"
-              name="max"
-              value={priceRange.max}
-              onChange={handlePriceChange}
-            />
-          </InputGroup>
-        </Col>
-      </Row>
+    <div className="homepage">
+      {/* Hero Section */}
+      <section className="hero-section">
+        <div className="hero-content">
+          <h1>Welcome to MEEMII'S</h1>
+          <p>Discover unique products that bring joy to your everyday life</p>
+          <Link to="/products">
+            <Button variant="primary" size="lg" className="hero-button">
+              Shop Now
+            </Button>
+          </Link>
+        </div>
+      </section>
 
-      <h2 className="text-center mb-4 section-title">Featured Products</h2>
-      
-      {products.length === 0 ? (
-        <div className="no-products">
-          <h3>No products found</h3>
-          <p>Try adjusting your filters or check back later for new items.</p>
-        </div>
-      ) : (
-        <div className="product-grid">
-          {products.map(product => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
-      )}
-    </Container>
+      {/* Featured Products Section */}
+      <Container className="featured-products-section">
+        <h2 className="section-title text-center">Featured Products</h2>
+        
+        {error ? (
+          <div className="text-center my-5">
+            <p className="text-danger">{error}</p>
+            <Button 
+              variant="outline-primary" 
+              onClick={() => fetchFeaturedProducts(8)}
+            >
+              Retry
+            </Button>
+          </div>
+        ) : (
+          <>
+            {/* Initial loading state - show skeleton loaders */}
+            {loading && displayProducts.length === 0 ? (
+              <Row>
+                {[...Array(4)].map((_, index) => (
+                  <Col key={index} lg={3} md={4} sm={6} className="mb-4">
+                    <div className="product-card-skeleton">
+                      <div className="skeleton-img"></div>
+                      <div className="skeleton-title"></div>
+                      <div className="skeleton-price"></div>
+                      <div className="skeleton-btn"></div>
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            ) : (
+              <>
+                {displayProducts.length === 0 ? (
+                  <div className="text-center my-5">
+                    <p>No products found. Check back later!</p>
+                  </div>
+                ) : (
+                  <Row>
+                    {displayProducts.map(product => (
+                      <Col key={product.id} lg={3} md={4} sm={6} className="mb-4">
+                        <ProductCard product={product} />
+                      </Col>
+                    ))}
+                  </Row>
+                )}
+              </>
+            )}
+
+            <div className="text-center mt-4">
+              <Link to="/products">
+                <Button variant="outline-primary" size="lg">
+                  View All Products
+                </Button>
+              </Link>
+            </div>
+          </>
+        )}
+      </Container>
+
+      {/* Categories Showcase Section */}
+      <section className="categories-showcase">
+        <Container>
+          <h2 className="section-title text-center">Shop By Category</h2>
+          <div className="category-cards">
+            {/* Add 3-4 category cards here */}
+            <Link to="/products?category=clothing" className="category-card">
+              <div className="category-img clothing-img"></div>
+              <h3>Clothing</h3>
+            </Link>
+            <Link to="/products?category=accessories" className="category-card">
+              <div className="category-img accessories-img"></div>
+              <h3>Accessories</h3>
+            </Link>
+            <Link to="/products?category=decor" className="category-card">
+              <div className="category-img decor-img"></div>
+              <h3>Home Decor</h3>
+            </Link>
+          </div>
+        </Container>
+      </section>
+    </div>
   );
 };
 

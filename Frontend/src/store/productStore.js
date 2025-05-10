@@ -5,6 +5,8 @@ import productService from '../services/productService';
 const useProductStore = create((set, get) => ({
   products: [],
   categories: [],
+  featuredProducts: [],
+  currentProduct: null,
   loading: false,
   error: null,
   totalPages: 1,
@@ -65,6 +67,31 @@ const useProductStore = create((set, get) => ({
     }
   },
 
+  fetchFeaturedProducts: async (limit = 4) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await productService.getProducts({ 
+        featured: true,
+        perPage: limit 
+      });
+      
+      if (!response || !response.data) {
+        throw new Error('Invalid response from server');
+      }
+      
+      set({ 
+        featuredProducts: response.data || [], 
+        loading: false 
+      });
+    } catch (error) {
+      console.error('Error fetching featured products:', error);
+      set({ 
+        error: error.message || 'Failed to load featured products', 
+        loading: false 
+      });
+    }
+  },
+
   fetchCategories: async () => {
     try {
       const categories = await productService.getCategories();
@@ -85,8 +112,8 @@ const useProductStore = create((set, get) => ({
     set({
       filters: {
         category: '',
-        minPrice: '',
-        maxPrice: '',
+        min_price: '', // Changed from minPrice
+        max_price: '', // Changed from maxPrice
         search: '',
         featured: false,
         page: 1,
@@ -94,6 +121,19 @@ const useProductStore = create((set, get) => ({
       }
     });
     get().fetchProducts({ reset: true });
+  },
+  
+  fetchProductById: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const product = await productService.getProductById(id);
+      set({ currentProduct: product, loading: false });
+      return product;
+    } catch (error) {
+      console.error('Failed to fetch product details', error);
+      set({ error: error.message || 'Failed to load product details', loading: false });
+      throw error;
+    }
   }
 }));
 

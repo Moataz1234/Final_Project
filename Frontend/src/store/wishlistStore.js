@@ -1,31 +1,48 @@
-// src/store/wishlistStore.jsx
+// src/store/wishlistStore.js
 import { create } from 'zustand';
-import wishlistService from '../services/wishlistService';
-import useAuthStore from './authStore';
+import api from '../services/api';
 
 const useWishlistStore = create((set, get) => ({
   items: [],
   loading: false,
   error: null,
+  initialized: false,
   
-  // Initialize wishlist - call this when app loads
+  // Initialize wishlist from server
   initialize: async () => {
-    // Skip API calls if not authenticated
-    if (!useAuthStore.getState().isAuthenticated) {
-      set({ items: [], loading: false });
-      return;
-    }
+    if (get().initialized) return; // Prevent multiple initializations
     
     set({ loading: true, error: null });
     try {
-      const items = await wishlistService.getWishlist();
+      const response = await api.get('/wishlist');
       set({
-        items: items || [],
+        items: response.data.data || response.data || [],
+        loading: false,
+        initialized: true
+      });
+    } catch (error) {
+      console.error('Failed to initialize wishlist:', error);
+      set({
+        error: error.response?.data?.message || 'Failed to load wishlist',
+        loading: false,
+        initialized: true
+      });
+    }
+  },
+  
+  // Fetch wishlist from server
+  fetchWishlist: async () => {
+    set({ loading: true, error: null });
+    try {
+      const response = await api.get('/wishlist');
+      set({
+        items: response.data.data || response.data || [],
         loading: false
       });
     } catch (error) {
+      console.error('Failed to fetch wishlist:', error);
       set({
-        error: error.response?.data?.message || 'Failed to fetch wishlist',
+        error: error.response?.data?.message || 'Failed to load wishlist',
         loading: false
       });
     }
@@ -33,18 +50,13 @@ const useWishlistStore = create((set, get) => ({
   
   // Add item to wishlist
   addItem: async (product) => {
-    if (!useAuthStore.getState().isAuthenticated) {
-      return;
-    }
-
     set({ loading: true, error: null });
     try {
-      const response = await wishlistService.addToWishlist(product.id);
-      set(state => ({
-        items: [...state.items, response.product],
-        loading: false
-      }));
+      await api.post('/wishlist', { product_id: product.id });
+      // Fetch fresh wishlist from server
+      await get().fetchWishlist();
     } catch (error) {
+      console.error('Failed to add to wishlist:', error);
       set({
         error: error.response?.data?.message || 'Failed to add to wishlist',
         loading: false
@@ -54,18 +66,13 @@ const useWishlistStore = create((set, get) => ({
   
   // Remove item from wishlist
   removeItem: async (productId) => {
-    if (!useAuthStore.getState().isAuthenticated) {
-      return;
-    }
-
     set({ loading: true, error: null });
     try {
-      await wishlistService.removeFromWishlist(productId);
-      set(state => ({
-        items: state.items.filter(item => item.id !== productId),
-        loading: false
-      }));
+      await api.delete(`/wishlist/${productId}`);
+      // Fetch fresh wishlist from server
+      await get().fetchWishlist();
     } catch (error) {
+      console.error('Failed to remove from wishlist:', error);
       set({
         error: error.response?.data?.message || 'Failed to remove from wishlist',
         loading: false
@@ -73,40 +80,17 @@ const useWishlistStore = create((set, get) => ({
     }
   },
   
-  // Clear wishlist
-  clearWishlist: async () => {
-    if (!useAuthStore.getState().isAuthenticated) {
-      return;
-    }
-
-    set({ loading: true, error: null });
-    try {
-      await wishlistService.clearWishlist();
-      set({ items: [], loading: false });
-    } catch (error) {
-      set({
-        error: error.response?.data?.message || 'Failed to clear wishlist',
-        loading: false
-      });
-    }
+  // Clear wishlist (for logout)
+  clearWishlist: () => {
+    set({
+      items: [],
+      initialized: false
+    });
   },
   
-  // Toggle item in wishlist (add if not present, remove if present)
-  toggleItem: async (product) => {
-    const { items } = get();
-    const exists = items.some(item => item.id === product.id);
-    
-    if (exists) {
-      await get().removeItem(product.id);
-    } else {
-      await get().addItem(product);
-    }
-  },
-  
-  // Check if product is in wishlist
+  // Check if an item is in wishlist
   isInWishlist: (productId) => {
-    const { items } = get();
-    return items.some(item => item.id === productId);
+    return get().items.some(item => item.product_id === productId);
   }
 }));
 

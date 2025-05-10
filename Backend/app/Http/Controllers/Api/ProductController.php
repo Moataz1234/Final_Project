@@ -17,12 +17,14 @@ class ProductController extends Controller
             'category',
             'min_price',
             'max_price',
-            'search'
+            'search',
+            'featured' // Add this line to accept the featured parameter
         ]);
-
-        // $products = $query->filter($filters)
+        if (isset($filters['featured']) && $filters['featured'] === 'true') {
+            $query->where('is_featured', true);
+        }
         //     ->paginate($request->input('per_page', 12));
-        $products = $query->filter($filters)
+        $products = $query->advancedFilter($filters)
         ->paginate($request->input('per_page', 12))
         ->through(function ($product) {
             // Ensure price is a float
