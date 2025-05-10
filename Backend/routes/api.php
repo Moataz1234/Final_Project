@@ -20,6 +20,7 @@ Route::get('/products/{id}', [ProductController::class, 'show']);
 Route::get('/categories', [ProductController::class, 'getCategories']);
 Route::get('/bundles', [BundleController::class, 'index']);
 Route::get('/promocodes', [PromoCodeController::class, 'index']);
+Route::get('/reviews', [ProductReviewController::class, 'index']);
 
 // Protected routes
 Route::middleware('auth:sanctum')->group(function () {

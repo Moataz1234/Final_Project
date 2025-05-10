@@ -1,4 +1,4 @@
-// Updated HomePage.jsx with debounced search
+// Updated HomePage.jsx with 2 products per row and dynamic categories
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Form, InputGroup, Button } from 'react-bootstrap';
 import { Search } from 'lucide-react';
@@ -49,11 +49,11 @@ const HomePage = () => {
 
   // Initial data fetch once on component mount
   useEffect(() => {
-    // Fetch categories for filters (if needed)
+    // Fetch categories for the categories section
     fetchCategories();
     
-    // Fetch a limited set of featured products for homepage
-    fetchFeaturedProducts(8); // Fetch only 8 featured products for the homepage
+    // Fetch a limited set of featured products for homepage - only 4 for 2x2 grid
+    fetchFeaturedProducts(4); // Fetch only 4 featured products for the homepage
   }, [fetchCategories, fetchFeaturedProducts]);
 
   // Show a subset of products or loading state
@@ -86,7 +86,7 @@ const HomePage = () => {
   };
 
   // Custom loading component with bouncing logo
-  if (loading) {
+  if (loading && (!featuredProducts || featuredProducts.length === 0)) {
     return <LoadingSpinner text="Loading amazing products for you..." />;
   }
   
@@ -127,7 +127,7 @@ const HomePage = () => {
             <p className="text-danger">{error}</p>
             <Button 
               variant="outline-primary" 
-              onClick={() => fetchFeaturedProducts(8)}
+              onClick={() => fetchFeaturedProducts(4)}
             >
               Retry
             </Button>
@@ -137,8 +137,8 @@ const HomePage = () => {
             {/* Initial loading state - show skeleton loaders */}
             {loading && displayProducts.length === 0 ? (
               <Row>
-                {[...Array(4)].map((_, index) => (
-                  <Col key={index} lg={3} md={4} sm={6} className="mb-4">
+                {[...Array(2)].map((_, index) => (
+                  <Col key={index} md={6} className="mb-4">
                     <div className="product-card-skeleton">
                       <div className="skeleton-img"></div>
                       <div className="skeleton-title"></div>
@@ -157,7 +157,7 @@ const HomePage = () => {
                 ) : (
                   <Row>
                     {displayProducts.map(product => (
-                      <Col key={product.id} lg={3} md={4} sm={6} className="mb-4">
+                      <Col key={product.id} md={6} className="mb-4">
                         <ProductCard product={product} />
                       </Col>
                     ))}
@@ -182,19 +182,34 @@ const HomePage = () => {
         <Container>
           <h2 className="section-title text-center">Shop By Category</h2>
           <div className="category-cards">
-            {/* Add 3-4 category cards here */}
-            <Link to="/products?category=clothing" className="category-card">
-              <div className="category-img clothing-img"></div>
-              <h3>Clothing</h3>
-            </Link>
-            <Link to="/products?category=accessories" className="category-card">
-              <div className="category-img accessories-img"></div>
-              <h3>Accessories</h3>
-            </Link>
-            <Link to="/products?category=decor" className="category-card">
-              <div className="category-img decor-img"></div>
-              <h3>Home Decor</h3>
-            </Link>
+            {categories && categories.length > 0 ? (
+              categories.map(category => (
+                <Link 
+                  key={category.id} 
+                  to={`/products?category=${category.slug}`} 
+                  className="category-card"
+                >
+                  <div className="category-img default-category-img"></div>
+                  <h3>{category.name}</h3>
+                </Link>
+              ))
+            ) : (
+              // Fallback categories if none are loaded from database
+              <>
+                <Link to="/products?category=clothing" className="category-card">
+                  <div className="category-img default-category-img"></div>
+                  <h3>Clothing</h3>
+                </Link>
+                <Link to="/products?category=accessories" className="category-card">
+                  <div className="category-img default-category-img"></div>
+                  <h3>Accessories</h3>
+                </Link>
+                <Link to="/products?category=home-decor" className="category-card">
+                  <div className="category-img default-category-img"></div>
+                  <h3>Home Decor</h3>
+                </Link>
+              </>
+            )}
           </div>
         </Container>
       </section>

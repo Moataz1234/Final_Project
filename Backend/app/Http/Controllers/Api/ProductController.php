@@ -13,24 +13,22 @@ class ProductController extends Controller
     {
         $query = Product::query()->with('category');
 
-        $filters = $request->only([
-            'category',
-            'min_price',
-            'max_price',
-            'search',
-            'featured' // Add this line to accept the featured parameter
-        ]);
+        // Include ALL filters including sort
+        $filters = $request->all();
+
         if (isset($filters['featured']) && $filters['featured'] === 'true') {
             $query->where('is_featured', true);
         }
-        //     ->paginate($request->input('per_page', 12));
+        
+        // Pass ALL filters to advancedFilter
         $products = $query->advancedFilter($filters)
-        ->paginate($request->input('per_page', 12))
-        ->through(function ($product) {
-            // Ensure price is a float
-            $product->price = floatval($product->price);
-            return $product;
-        });
+            ->paginate($request->input('per_page', 12))
+            ->through(function ($product) {
+                // Ensure price is a float
+                $product->price = floatval($product->price);
+                return $product;
+            });
+            
         return response()->json($products);
     }
 
@@ -39,6 +37,7 @@ class ProductController extends Controller
         $product = Product::findOrFail($id);
         return response()->json($product);
     }
+    
     public function getCategories()
     {
         $categories = Category::all();

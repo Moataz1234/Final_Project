@@ -21,9 +21,32 @@ const productService = {
     try {
       let queryString = '';
       
-      if (Object.keys(filters).length) {
-        queryString = '?' + new URLSearchParams(filters).toString();
+      // Clean up filters and prepare for API
+      const cleanFilters = {};
+      Object.keys(filters).forEach(key => {
+        const value = filters[key];
+        
+        // Skip empty values except for is_on_sale which could be "0"
+        if (value === '' || value === null || value === undefined) {
+          return;
+        }
+        
+        // Handle boolean/binary values
+        if (key === 'is_on_sale' || key === 'featured') {
+          // Convert string "1" or "0" to actual integers for the API
+          cleanFilters[key] = value === '1' || value === true ? 1 : 0;
+        } else {
+          cleanFilters[key] = value;
+        }
+      });
+      
+      console.log('Cleaned filters for API:', cleanFilters); // Debug log
+      
+      if (Object.keys(cleanFilters).length) {
+        queryString = '?' + new URLSearchParams(cleanFilters).toString();
       }
+      
+      console.log('Final API URL:', `/products${queryString}`); // Debug log
       
       const response = await api.get(`/products${queryString}`);
       

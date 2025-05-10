@@ -1,132 +1,81 @@
 // src/components/Products/ProductList/ProductList.jsx
 import React from 'react';
+import { Container, Row, Spinner, Alert } from 'react-bootstrap';
+import { Package } from 'lucide-react';
 import ProductCard from '../ProductCard/ProductCard';
+import Pagination from '../../UI/Pagination/Pagination';
 import useProductStore from '../../../store/productStore';
-import { Pagination } from 'react-bootstrap';
 import './ProductList.css';
 
 const ProductList = () => {
   const { 
     products, 
     loading, 
-    error, 
-    filters, 
-    setFilter, 
-    fetchProducts, 
-    totalPages 
+    error,
+    filters,
+    totalPages,
+    setFilter 
   } = useProductStore();
 
+  // Handle page change
   const handlePageChange = (page) => {
     setFilter({ page });
+    // Scroll to top of product list
+    window.scrollTo({ top: 200, behavior: 'smooth' });
   };
 
-  // Generate pagination items
-  const renderPaginationItems = () => {
-    const items = [];
-    const currentPage = filters.page;
-    
-    // Previous button
-    items.push(
-      <Pagination.Prev 
-        key="prev" 
-        disabled={currentPage === 1}
-        onClick={() => handlePageChange(currentPage - 1)}
-      />
+  if (loading) {
+    return (
+      <div className="product-list-loading">
+        <Spinner animation="border" role="status" size="lg" />
+        <p>Loading products...</p>
+      </div>
     );
+  }
 
-    // Always show first page
-    items.push(
-      <Pagination.Item 
-        key={1} 
-        active={currentPage === 1}
-        onClick={() => handlePageChange(1)}
-      >
-        1
-      </Pagination.Item>
+  if (error) {
+    return (
+      <Alert variant="danger" className="m-3">
+        <Alert.Heading>Error loading products</Alert.Heading>
+        <p>{error}</p>
+      </Alert>
     );
+  }
 
-    // Add ellipsis if needed
-    if (currentPage > 3) {
-      items.push(<Pagination.Ellipsis key="ellipsis1" />);
-    }
-
-    // Add pages around current page
-    for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) {
-      if (i > 1 && i < totalPages) {
-        items.push(
-          <Pagination.Item 
-            key={i} 
-            active={currentPage === i}
-            onClick={() => handlePageChange(i)}
-          >
-            {i}
-          </Pagination.Item>
-        );
-      }
-    }
-
-    // Add ellipsis if needed
-    if (currentPage < totalPages - 2 && totalPages > 3) {
-      items.push(<Pagination.Ellipsis key="ellipsis2" />);
-    }
-
-    // Always show last page if there's more than one page
-    if (totalPages > 1) {
-      items.push(
-        <Pagination.Item 
-          key={totalPages} 
-          active={currentPage === totalPages}
-          onClick={() => handlePageChange(totalPages)}
-        >
-          {totalPages}
-        </Pagination.Item>
-      );
-    }
-
-    // Next button
-    items.push(
-      <Pagination.Next 
-        key="next" 
-        disabled={currentPage === totalPages}
-        onClick={() => handlePageChange(currentPage + 1)}
-      />
+  if (!products || products.length === 0) {
+    return (
+      <div className="product-list-empty">
+        <Package size={48} className="empty-icon" />
+        <h3>No products found</h3>
+        <p>Try adjusting your filters or search terms</p>
+      </div>
     );
-
-    return items;
-  };
-
-  if (loading) return <div className="loading-spinner">Loading...</div>;
-  if (error) return <div className="error-message">Error: {error}</div>;
+  }
 
   return (
     <div className="product-list-container">
-      {products.length === 0 ? (
-        <div className="no-products">
-          <h3>No products found</h3>
-          <p>Try changing your search criteria or browse all products.</p>
-          <button 
-            className="reset-button"
-            onClick={() => {
-              fetchProducts({ reset: true });
-            }}
-          >
-            View All Products
-          </button>
+      <div className="product-list-header">
+        <div className="product-count">
+          <Package size={20} />
+          <span>{products.length} products found</span>
         </div>
-      ) : (
-        <>
-          <div className="product-grid">
-            {products.map(product => (
-              <ProductCard key={product.id} product={product} />
-            ))}
-          </div>
-          
-          {totalPages > 1 && (
-            <div className="pagination-container">
-              <Pagination>{renderPaginationItems()}</Pagination>
-            </div>
-          )}
-        </>
+      </div>
+
+      <Row className="g-4 product-grid">
+        {products.map((product) => (
+          <ProductCard key={product.id} product={product} />
+        ))}
+      </Row>
+
+      {totalPages > 1 && (
+        <Pagination
+          currentPage={filters.page || 1}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+          siblingCount={1}
+          showFirst={true}
+          showLast={true}
+        />
       )}
     </div>
   );

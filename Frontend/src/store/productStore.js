@@ -10,11 +10,18 @@ const useProductStore = create((set, get) => ({
   loading: false,
   error: null,
   totalPages: 1,
+  totalProducts: 0,
+  currentPage: 1,
   filters: {
     category: '',
-    minPrice: '',
-    maxPrice: '',
+    min_price: '',
+    max_price: '',
     search: '',
+    rating: '',
+    scent_type: '',
+    suitable_for: '',
+    is_on_sale: '',
+    sort: 'name_asc',
     featured: false,
     page: 1,
     perPage: 12
@@ -23,31 +30,27 @@ const useProductStore = create((set, get) => ({
   fetchProducts: async (params = {}) => {
     set({ loading: true, error: null });
     try {
-      // If reset flag is passed, reset filters first
-      if (params.reset) {
-        set({
-          filters: {
-            ...get().filters,
-            category: '',
-            minPrice: '',
-            maxPrice: '',
-            search: '',
-            page: 1
-          }
-        });
-      }
-      
       // Merge provided params with current filters
-      const currentFilters = params.reset ? 
-        { page: 1, perPage: get().filters.perPage } : 
-        get().filters;
-        
+      const currentFilters = get().filters;
       const apiParams = {
         ...currentFilters,
         ...params
       };
       
-      const response = await productService.getProducts(apiParams);
+      // Clean up filters - remove empty values but keep sort
+      const cleanParams = {};
+      Object.keys(apiParams).forEach(key => {
+        const value = apiParams[key];
+        // Always include sort parameter, even if it's the default
+        if (key === 'sort' || (value !== '' && value !== null && value !== undefined)) {
+          cleanParams[key] = value;
+        }
+      });
+      
+      console.log('Sending filters to API:', cleanParams); // Debug log
+      console.log('Sort parameter specifically:', cleanParams.sort); // Debug sort
+      
+      const response = await productService.getProducts(cleanParams);
       
       if (!response || !response.data) {
         throw new Error('Invalid response from server');
@@ -56,7 +59,9 @@ const useProductStore = create((set, get) => ({
       set({ 
         products: response.data || [], 
         loading: false,
-        totalPages: response.last_page || 1
+        totalPages: response.last_page || 1,
+        totalProducts: response.total || 0,
+        currentPage: response.current_page || 1
       });
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -102,25 +107,45 @@ const useProductStore = create((set, get) => ({
   },
 
   setFilter: (newFilters) => {
+    console.log('Setting filter:', newFilters); // Debug log
+    
+    const shouldResetPage = !newFilters.hasOwnProperty('page');
+    
     set(state => ({
-      filters: { ...state.filters, ...newFilters, page: 1 }
+      filters: { 
+        ...state.filters, 
+        ...newFilters, 
+        // Reset page to 1 unless we're changing the page itself
+        page: shouldResetPage ? 1 : (newFilters.page || state.filters.page)
+      }
     }));
+    
+    // Fetch products after setting filter
     get().fetchProducts();
   },
 
   resetFilters: () => {
+    console.log('Resetting filters'); // Debug log
+    
     set({
       filters: {
         category: '',
-        min_price: '', // Changed from minPrice
-        max_price: '', // Changed from maxPrice
+        min_price: '',
+        max_price: '',
         search: '',
+        rating: '',
+        scent_type: '',
+        suitable_for: '',
+        is_on_sale: '',
+        sort: 'name_asc',
         featured: false,
         page: 1,
         perPage: 12
       }
     });
-    get().fetchProducts({ reset: true });
+    
+    // Fetch products after resetting filters
+    get().fetchProducts();
   },
   
   fetchProductById: async (id) => {

@@ -1,165 +1,17 @@
 /* Authentication Form Styles */
 
-
-.logo {
-  max-width: 200px;
-  margin: 0 auto 20px;
-  display: block;
+:root {
+  --primary-color: #fc8fa7;
+  --secondary-color: #aaaaaa;
+  --background-color: #121212;
+  --input-background: #1e1e1e;
+  --error-color: #ff4444;
+  --success-color: #4caf50;
 }
 
-.form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  max-width: 450px;
-  padding: 30px;
-  border-radius: 20px;
-  position: relative;
-  background-color: var(--background-color);
-  color: #fff;
-  border: 1px solid #333;
-  margin: 0 auto;
-  width: 100%;
-}
-.name{
-    display: flex;
-    gap: 30px;
-}
-.title {
-  font-size: 28px;
-  font-weight: 600;
-  letter-spacing: -1px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  padding-left: 30px;
-  color: var(--primary-color);
-  margin-bottom: 10px;
-}
-
-.title::before {
-  width: 18px;
-  height: 18px;
-}
-
-.title::after {
-  width: 18px;
-  height: 18px;
-  animation: pulse 1s linear infinite;
-}
-
-.title::before,
-.title::after {
-  position: absolute;
-  content: "";
-  height: 16px;
-  width: 16px;
-  border-radius: 50%;
-  left: 0px;
-  background-color: var(--primary-color);
-}
-
-.message, 
-.signin {
-  font-size: 14.5px;
-  color: var(--secondary-color);
-  text-align: center;
-  margin-bottom: 15px;
-}
-
-.signin a:hover {
-  text-decoration: underline var(--primary-color);
-}
-
-.signin a {
-  color: var(--primary-color);
-}
-
-.flex {
-  display: flex;
-  width: 100%;
-  gap: 15px; /* Increased space between first and last name */
-}
-
-.form label {
-  position: relative;
-  width: 100%;
-}
-
-.form label .input {
-  background-color: var(--input-background);
-  color: #fff;
-  width: 100%;
-  padding: 20px 5px 5px 10px;
-  outline: 0;
-  border: 1px solid rgba(105, 105, 105, 0.397);
-  border-radius: 10px;
-  font-size: medium;
-}
-
-.form label .input + span {
-  color: rgba(255, 255, 255, 0.5);
-  position: absolute;
-  left: 10px;
-  top: 0px;
-  font-size: 0.9em;
-  cursor: text;
-  transition: 0.3s ease;
-}
-
-.form label .input:placeholder-shown + span {
-  top: 12.5px;
-  font-size: 0.9em;
-}
-
-.form label .input:focus + span,
-.form label .input:valid + span {
-  color: var(--primary-color);
-  top: 0px;
-  font-size: 0.7em;
-  font-weight: 600;
-}
-
-.submit {
-  border: none;
-  outline: none;
-  padding: 10px;
-  border-radius: 10px;
-  color: #fff;
-  font-size: 16px;
-  transition: 0.3s ease;
-  background-color: var(--primary-color);
-  width: 100%;
-  margin-top: 10px;
-  cursor: pointer;
-}
-
-.submit:hover {
-  opacity: 0.9;
-}
-
-.submit:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.error-message {
-  background-color: #ff4444;
-  color: white;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 15px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.error-message button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
+/* Base styles */
+* {
+  box-sizing: border-box;
 }
 
 .auth-container {
@@ -172,140 +24,270 @@
   padding: 20px;
 }
 
-@keyframes pulse {
-  from {
-    transform: scale(0.9);
-    opacity: 1;
-  }
-  to {
-    transform: scale(1.8);
-    opacity: 0;
-  }
-}
-
-/* Auth Components Shared Styles */
-
-:root {
-  --auth-primary-color: #fc8fa7;
-  --auth-primary-color-dark: #ff6b9e;
-  --auth-background: #121212;
-  --auth-card-background: #1e1e1e;
-  --auth-input-background: #2c2c2c;
-  --auth-input-border: #3c3c3c;
-  --auth-text-color: #ffffff;
-  --auth-text-color-secondary: #aaaaaa;
-  --auth-error-color: #ff4444;
-}
-
-.auth-logo-image {
-  display: block;
-  margin: 0 auto 20px;
-  max-width: 150px;
-  height: auto;
-}
-
-.auth-error {
-  background-color: var(--auth-error-color);
-  color: white;
-  padding: 10px 15px;
-  border-radius: 8px;
-  margin-bottom: 20px;
-  text-align: center;
-  animation: fadeIn 0.3s ease;
-}
-
-.auth-form-container {
-  background-color: var(--auth-card-background);
-  border-radius: 16px;
-  padding: 30px;
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
   max-width: 450px;
-  width: 100%;
+  padding: 40px;
+  border-radius: 20px;
+  position: relative;
+  background-color: var(--background-color);
+  color: #fff;
+  border: 1px solid #333;
   margin: 0 auto;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
-}
-
-.auth-title {
-  color: var(--auth-primary-color);
-  text-align: center;
-  margin-bottom: 20px;
-  font-size: 2rem;
-  font-weight: bold;
-}
-
-.auth-subtitle {
-  color: var(--auth-text-color-secondary);
-  text-align: center;
-  margin-bottom: 25px;
-  font-size: 1rem;
-}
-
-.auth-form-group {
-  margin-bottom: 20px;
-}
-
-.auth-label {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--auth-text-color-secondary);
-  font-weight: bold;
-}
-
-.auth-input {
   width: 100%;
-  padding: 12px 15px;
-  background-color: var(--auth-input-background);
-  border: 1px solid var(--auth-input-border);
-  border-radius: 8px;
-  color: var(--auth-text-color);
-  font-size: 1rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+}
+
+/* Logo styles */
+.logo {
+  max-width: 200px;
+  margin: 0 auto 30px;
+  display: block;
+}
+
+/* Title and subtitle */
+.title {
+  font-size: 32px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--primary-color);
+  margin-bottom: 10px;
+}
+
+.message {
+  font-size: 16px;
+  color: var(--secondary-color);
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+/* Input groups */
+.input-group {
+  position: relative;
+  margin-bottom: 5px;
+}
+
+.input {
+  background-color: var(--input-background);
+  color: #fff;
+  width: 100%;
+  padding: 15px;
+  outline: 0;
+  border: 1px solid rgba(105, 105, 105, 0.397);
+  border-radius: 10px;
+  font-size: 16px;
   transition: border-color 0.3s ease;
 }
 
-.auth-input:focus {
-  border-color: var(--auth-primary-color);
-  outline: none;
+.input:focus {
+  border-color: var(--primary-color);
 }
 
-.auth-button {
-  width: 100%;
-  padding: 12px;
-  background-color: var(--auth-primary-color);
-  color: white;
+.input-label {
+  color: rgba(255, 255, 255, 0.7);
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  background-color: var(--input-background);
+  padding: 0 5px;
+}
+
+.input:focus + .input-label,
+.input:not(:placeholder-shown) + .input-label {
+  top: -10px;
+  left: 10px;
+  font-size: 12px;
+  color: var(--primary-color);
+}
+
+/* Flex container for name fields */
+.flex {
+  display: flex;
+  gap: 15px;
+}
+
+.flex .input-group {
+  flex: 1;
+}
+
+/* Buttons */
+.submit {
   border: none;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
+  outline: none;
+  padding: 15px;
+  border-radius: 10px;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  background-color: var(--primary-color);
+  width: 100%;
   cursor: pointer;
-  transition: background-color 0.3s ease;
   margin-top: 10px;
 }
 
-.auth-button:hover {
-  background-color: var(--auth-primary-color-dark);
+.submit:hover {
+  background-color: #ff6b9e;
+  transform: translateY(-2px);
 }
 
-.auth-button:disabled {
-  background-color: #666;
+.submit:active {
+  transform: translateY(0);
+}
+
+.submit:disabled {
+  opacity: 0.6;
   cursor: not-allowed;
+  transform: none;
 }
 
-.auth-link {
+/* Social login section */
+.social-login {
+  margin-top: 30px;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  color: var(--secondary-color);
+  margin: 20px 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.divider span {
+  padding: 0 15px;
+  font-size: 14px;
+}
+
+.social-buttons {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.social-button {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #333;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: transparent;
+  position: relative;
+  overflow: hidden;
+}
+
+.social-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+.social-button.google:hover {
+  border-color: #db4437;
+  background-color: rgba(219, 68, 55, 0.1);
+}
+
+.social-button.facebook:hover {
+  border-color: #1877f2;
+  background-color: rgba(24, 119, 242, 0.1);
+}
+
+.social-button.instagram:hover {
+  border-color: #e1306c;
+  background-color: rgba(225, 48, 108, 0.1);
+}
+
+.social-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Error message */
+.error-message {
+  background-color: var(--error-color);
+  color: white;
+  padding: 12px 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  animation: slideIn 0.3s ease;
+}
+
+.error-message button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.error-message button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Sign in/up link */
+.signin {
+  font-size: 14px;
+  color: var(--secondary-color);
   text-align: center;
   margin-top: 20px;
-  color: var(--auth-text-color-secondary);
 }
 
-.auth-link a {
-  color: var(--auth-primary-color);
+.signin a {
+  color: var(--primary-color);
   text-decoration: none;
-  font-weight: bold;
+  font-weight: 600;
+  transition: opacity 0.3s ease;
 }
 
-.auth-link a:hover {
+.signin a:hover {
+  opacity: 0.8;
   text-decoration: underline;
 }
 
-@keyframes fadeIn {
+/* Loading state */
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #fff;
+  border-top: 2px solid transparent;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 10px;
+  display: inline-block;
+}
+
+/* Animations */
+@keyframes slideIn {
   from {
     opacity: 0;
     transform: translateY(-10px);
@@ -313,5 +295,30 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .form {
+    padding: 30px 20px;
+  }
+  
+  .flex {
+    flex-direction: column;
+  }
+  
+  .social-buttons {
+    gap: 10px;
+  }
+  
+  .social-button {
+    width: 45px;
+    height: 45px;
   }
 }

@@ -1,0 +1,180 @@
+/* src/components/Common/Pagination/Pagination.css */
+.pagination-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    margin: 40px 0;
+    padding: 20px 0;
+  }
+  
+  .pagination-info {
+    font-size: 0.9rem;
+    color: var(--text-color-secondary);
+    font-weight: 500;
+  }
+  
+  .pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .pagination-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 40px;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid var(--input-border);
+    background-color: var(--card-background);
+    color: var(--text-color);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .pagination-button:hover:not(:disabled) {
+    background-color: var(--input-background);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pagination-button:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .pagination-button.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    font-weight: 600;
+  }
+  
+  .pagination-button.active:hover {
+    background-color: var(--primary-color-dark);
+    border-color: var(--primary-color-dark);
+  }
+  
+  .pagination-button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .pagination-button:disabled:hover {
+    background-color: var(--card-background);
+    border-color: var(--input-border);
+    transform: none;
+    box-shadow: none;
+  }
+  
+  .pagination-nav {
+    padding: 0;
+    color: var(--primary-color);
+  }
+  
+  .pagination-nav:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  .pagination-dots {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: var(--text-color-secondary);
+    font-weight: 600;
+    user-select: none;
+  }
+  
+  /* Mobile responsive */
+  @media (max-width: 640px) {
+    .pagination-container {
+      gap: 15px;
+      margin: 30px 0;
+    }
+    
+    .pagination-button {
+      min-width: 36px;
+      height: 36px;
+      padding: 0 10px;
+      font-size: 0.85rem;
+    }
+    
+    .pagination-controls {
+      gap: 4px;
+    }
+    
+    .pagination-info {
+      font-size: 0.85rem;
+    }
+  }
+  
+  /* Dark theme support */
+  [data-theme="dark"] .pagination-button {
+    background-color: #2b3036;
+    border-color: #404653;
+    color: #e0e0e0;
+  }
+  
+  [data-theme="dark"] .pagination-button:hover:not(:disabled) {
+    background-color: #363b44;
+    border-color: var(--primary-color);
+  }
+  
+  [data-theme="dark"] .pagination-button.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+  }
+  
+  [data-theme="dark"] .pagination-nav {
+    color: var(--primary-color);
+  }
+  
+  [data-theme="dark"] .pagination-nav:hover:not(:disabled) {
+    background-color: var(--primary-color);
+    color: white;
+  }
+  
+  /* Loading state */
+  .pagination-container.loading {
+    pointer-events: none;
+    opacity: 0.6;
+  }
+  
+  /* Smooth number change animation */
+  .pagination-button {
+    position: relative;
+  }
+  
+  .pagination-button::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, rgba(var(--primary-color-rgb), 0.2) 0%, transparent 70%);
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s ease;
+  }
+  
+  .pagination-button:active::after {
+    opacity: 1;
+    transform: scale(1);
+    transition: 0s;
+  }

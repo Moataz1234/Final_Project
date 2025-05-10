@@ -3,11 +3,17 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import useAuthStore from '../../store/authStore';
 import useCartStore from '../../store/cartStore';
 import useWishlistStore from '../../store/wishlistStore';
+import FormInput from '../UI/Input';
+import ErrorMessage from '../UI/ErrorMessage';
+import SocialLogin from '../UI/SocialLogin';
 import './auth.css';
 
 const LoginForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+  
   const { login, loading, error, clearError } = useAuthStore();
   const { syncCart } = useCartStore();
   const { syncWishlist } = useWishlistStore();
@@ -20,17 +26,56 @@ const LoginForm = () => {
     return searchParams.get('redirect') || '/';
   };
 
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (error) clearError();
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await login({ email, password });
+      await login(formData);
       // After successful login, sync cart and wishlist
       await syncCart();
       await syncWishlist();
       navigate(getRedirectPath());
     } catch (error) {
-      // Error is already handled in the store
       console.error('Login failed:', error);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      // Initialize Google Sign-In
+      const auth2 = window.gapi.auth2.getAuthInstance();
+      const googleUser = await auth2.signIn();
+      const idToken = googleUser.getAuthResponse().id_token;
+      
+      // Send the token to your backend
+      const response = await fetch('/api/auth/google', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ idToken }),
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        // Store the token in your auth store
+        useAuthStore.getState().setAuth(data.user, data.token);
+        
+        // Sync cart and wishlist
+        await syncCart();
+        await syncWishlist();
+        navigate(getRedirectPath());
+      } else {
+        throw new Error('Google login failed');
+      }
+    } catch (error) {
+      console.error('Google login failed:', error);
+      // Show error message
     }
   };
 
@@ -42,47 +87,49 @@ const LoginForm = () => {
   return (
     <div className="auth-container">
       <form className="form" onSubmit={handleSubmit}>
-        <p className="title">Login</p>
-        <p className="message">Sign in to access your account.</p>
+        <h1 className="title">Welcome Back</h1>
+        <p className="message">Sign in to access your account</p>
 
-          {error && (
-          <div className="error-message">
-            {error}
-            <button type="button" onClick={clearError}>×</button>
-          </div>
-        )}
+        <ErrorMessage error={error} onClose={clearError} />
 
-        <label>
-          <input 
-                type="email"
-            className="input" 
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-          <span>Email</span>
-        </label>
+        <FormInput
+          label="Email"
+          type="email"
+          name="email"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          autoComplete="email"
+        />
 
-        <label>
-          <input 
-                type="password"
-            className="input" 
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-          />
-          <span>Password</span>
-        </label>
+        <FormInput
+          label="Password"
+          type="password"
+          name="password"
+          value={formData.password}
+          onChange={handleChange}
+          required
+          autoComplete="current-password"
+        />
 
         <button className="submit" type="submit" disabled={loading}>
-          {loading ? 'Signing in...' : 'Sign in'}
+          {loading ? (
+            <>
+              <span className="loading-spinner"></span>
+              Signing in...
+            </>
+          ) : (
+            'Sign in'
+          )}
         </button>
 
+        <SocialLogin onGoogleLogin={handleGoogleLogin} />
+
         <p className="signin">
-          Don't have an account? <Link to="/register">Register</Link>
+          Don't have an account? <Link to="/register">Create one</Link>
         </p>
       </form>
-          </div>
+    </div>
   );
 };
 

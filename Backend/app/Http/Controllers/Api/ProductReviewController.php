@@ -10,11 +10,18 @@ use Illuminate\Support\Facades\Auth;
 class ProductReviewController extends Controller
 {
     // List all reviews (admin)
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(ProductReview::with('user', 'product')->get());
+        $query = ProductReview::with('user', 'product');
+        if ($request->has('product_id')) {
+            $query->where('product_id', $request->input('product_id'));
+        }
+        // Optionally, only show approved reviews to non-admins
+        if (!$request->user() || !$request->user()->hasRole('admin')) {
+            $query->where('is_approved', true);
+        }
+        return response()->json($query->get());
     }
-
     // Store a new review (user)
     public function store(Request $request)
     {
@@ -24,6 +31,13 @@ class ProductReviewController extends Controller
             'review' => 'nullable|string',
         ]);
         $validated['user_id'] = Auth::id();
+        $existingReview = ProductReview::where('user_id', $validated['user_id'])
+            ->where('product_id', $validated['product_id'])
+            ->first();
+        if ($existingReview) {
+            return response()->json(['message' => 'You have already reviewed this product.'], 422);
+        }
+
         $review = ProductReview::create($validated);
         return response()->json($review, 201);
     }
@@ -57,4 +71,4 @@ class ProductReviewController extends Controller
         $review->save();
         return response()->json(['message' => 'Review approved', 'review' => $review]);
     }
-} 
+}
