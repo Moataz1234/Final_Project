@@ -1,4 +1,3 @@
-// src/pages/Products/ProductDetailsPage.jsx
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Container, Row, Col, Button, Form, Alert, Tabs, Tab } from 'react-bootstrap';
@@ -10,6 +9,7 @@ import useAuthStore from '../../../store/authStore';
 import { showSuccessToast, showErrorToast } from '../../../utils/notifications';
 import LoadingSpinner from '../../../components/UI/LoadingSpinner/LoadingSpinner';
 import ProductCard from '../../../components/Products/ProductCard/ProductCard';
+import reviewService from '../../../services/reviewService';
 import './ProductDetailsPage.css';
 
 const ProductDetailsPage = () => {
@@ -47,12 +47,24 @@ const ProductDetailsPage = () => {
     }
   }, [currentProduct, id, fetchProducts, products]);
 
+  // Fetch CSRF token on mount
+  useEffect(() => {
+    const fetchCsrfToken = async () => {
+      await fetch('http://localhost:8000/sanctum/csrf-cookie', {
+        credentials: 'include',
+      });
+    };
+    fetchCsrfToken();
+  }, []);
+
   // Fetch reviews for the product
   useEffect(() => {
     const fetchReviews = async () => {
       try {
         setReviewLoading(true);
-        const response = await fetch(`http://localhost:8000/api/reviews?product_id=${id}`);
+        const response = await fetch(`http://localhost:8000/api/reviews?product_id=${id}`, {
+          credentials: 'include',
+        });
         if (!response.ok) {
           const text = await response.text();
           throw new Error(`HTTP error! status: ${response.status}, body: ${text}`);
@@ -121,12 +133,12 @@ const ProductDetailsPage = () => {
 
   const handleRatingChange = (rating) => {
     setNewReview((prev) => ({ ...prev, rating }));
-    setSubmissionError(null); // Clear error when user interacts
+    setSubmissionError(null);
   };
 
   const handleReviewTextChange = (e) => {
     const text = e.target.value;
-    if (text.length <= 500) { // Optional: Limit review text to 500 characters
+    if (text.length <= 500) {
       setNewReview((prev) => ({ ...prev, review: text }));
       setSubmissionError(null);
     }
@@ -138,39 +150,36 @@ const ProductDetailsPage = () => {
       navigate(`/login?redirect=/products/${id}`);
       return;
     }
-
-    // Client-side validation
+  
     if (newReview.rating < 1 || newReview.rating > 5) {
       setSubmissionError('Please select a rating between 1 and 5 stars.');
       return;
     }
-
+  
     try {
       setReviewLoading(true);
-      setSubmissionError(null);
-      const response = await fetch('http://localhost:8000/api/reviews', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.token}`, // Ensure token is available
-        },
-        credentials: 'include',
-        body: JSON.stringify({
-          product_id: parseInt(id),
-          rating: newReview.rating,
-          review: newReview.review.trim() || null, // Send null if review is empty
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      const data = await reviewService.addReview(
+        parseInt(id),
+        newReview.rating,
+        newReview.review.trim() || null
+      );
+      
+      // Check if this is an update or new review
+      const existingReviewIndex = reviews.findIndex(r => r.user_id === user.id);
+      
+      if (existingReviewIndex !== -1) {
+        // Update existing review in the list
+        const updatedReviews = [...reviews];
+        updatedReviews[existingReviewIndex] = { ...data, user: { name: user.name || 'User' } };
+        setReviews(updatedReviews);
+        showSuccessToast('Your review has been updated! It will be visible once approved.');
+      } else {
+        // Add new review to the list
+        setReviews((prev) => [...prev, { ...data, user: { name: user.name || 'User' } }]);
+        showSuccessToast('Review submitted successfully! It will be visible once approved.');
       }
-
-      const data = await response.json();
-      setReviews((prev) => [...prev, { ...data, user: { name: user.name || 'User' } }]);
+      
       setNewReview({ rating: 0, review: '' });
-      showSuccessToast('Review submitted successfully! It will be visible once approved.');
     } catch (err) {
       console.error('Error submitting review:', err);
       setSubmissionError(err.message || 'Failed to submit review. Please try again.');
@@ -219,7 +228,6 @@ const ProductDetailsPage = () => {
   const displayPrice = currentProduct.is_on_sale && currentProduct.sale_price ? currentProduct.sale_price : currentProduct.price;
   const originalPrice = currentProduct.is_on_sale ? currentProduct.price : null;
 
-  // Calculate rating distribution
   const ratingDistribution = Array(5).fill(0);
   reviews.forEach((review) => {
     if (review.rating >= 1 && review.rating <= 5) {
@@ -235,7 +243,6 @@ const ProductDetailsPage = () => {
       </Link>
 
       <div className="product-details-wrapper">
-        {/* Product Image */}
         <div className="product-image">
           {imageError ? (
             <div className="product-detail-fallback">
@@ -252,7 +259,6 @@ const ProductDetailsPage = () => {
           )}
         </div>
 
-        {/* Product Info */}
         <div className="product-info">
           <div className="product-meta">
             <Link to={`/categories/${currentProduct.category?.slug || 'unknown'}`}>
@@ -299,7 +305,6 @@ const ProductDetailsPage = () => {
             Category: <Link to={`/products?category=${currentProduct.category?.slug}`}>{currentProduct.category?.name}</Link>
           </div>
 
-          {/* Quantity and Action Buttons */}
           <div className="action-buttons">
             {productInStock && (
               <Form.Group className="quantity-selector">
@@ -338,7 +343,6 @@ const ProductDetailsPage = () => {
             </Button>
           </div>
 
-          {/* Product Details */}
           <div className="product-details">
             <ul>
               <li><strong>Care Instructions:</strong> {currentProduct.usage_instructions || 'N/A'}</li>
@@ -350,7 +354,6 @@ const ProductDetailsPage = () => {
         </div>
       </div>
 
-      {/* Tabs */}
       <div className="tabs-section">
         <Tabs
           id="product-tabs"
@@ -453,7 +456,6 @@ const ProductDetailsPage = () => {
                 </div>
               )}
 
-              {/* Review Form */}
               <div className="review-form-section">
                 <h4 className="form-title">Write Your Review</h4>
                 {isAuthenticated ? (

@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'paths' => ['api/*'],
+    'paths' => ['api/*', 'sanctum/csrf-cookie', 'login'],
     'allowed_methods' => ['*'],
     'allowed_origins' => ['http://localhost:3000'], // Your React app URL
     'allowed_origins_patterns' => [],

@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ProductReview;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\Log;
 class ProductReviewController extends Controller
 {
     // List all reviews (admin)
@@ -25,19 +25,36 @@ class ProductReviewController extends Controller
     // Store a new review (user)
     public function store(Request $request)
     {
+        Log::info('Review submission', [
+            'user' => Auth::user(),
+            'is_authenticated' => Auth::check(),
+            'request_data' => $request->all(),
+        ]);
+        
         $validated = $request->validate([
             'product_id' => 'required|exists:products,id',
             'rating' => 'required|integer|min:1|max:5',
             'review' => 'nullable|string',
         ]);
+        
         $validated['user_id'] = Auth::id();
-        $existingReview = ProductReview::where('user_id', $validated['user_id'])
+        
+        // Check if user has already reviewed this product
+        $existingReview = ProductReview::where('user_id', Auth::id())
             ->where('product_id', $validated['product_id'])
             ->first();
+            
         if ($existingReview) {
-            return response()->json(['message' => 'You have already reviewed this product.'], 422);
+            // Update existing review
+            $existingReview->update([
+                'rating' => $validated['rating'],
+                'review' => $validated['review'],
+                'is_approved' => false // Reset approval status for updated review
+            ]);
+            return response()->json($existingReview, 200);
         }
-
+        
+        // Create new review if none exists
         $review = ProductReview::create($validated);
         return response()->json($review, 201);
     }

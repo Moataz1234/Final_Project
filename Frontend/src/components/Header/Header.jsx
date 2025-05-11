@@ -36,7 +36,7 @@ const Header = () => {
       <div className={`nav-links ${isMobileMenuOpen ? 'mobile-open' : ''}`}>
         <Link to="/" className="nav-item">Home</Link>
         <Link to="/products" className="nav-item">Products</Link>
-        <Link to="/categories" className="nav-item">Categories</Link>
+        <Link to="/orders" className="nav-item">Orders</Link>
       </div>
 
       <div className="auth-buttons">

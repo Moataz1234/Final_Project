@@ -91,7 +91,7 @@ const productService = {
   // Get product reviews
   getProductReviews: async (productId) => {
     try {
-      const response = await api.get(`/products/${productId}/reviews`);
+      const response = await api.get(`/reviews?product_id=${productId}`);
       return response.data;
     } catch (error) {
       console.error(`Error fetching reviews for product ${productId}:`, error);
@@ -99,16 +99,58 @@ const productService = {
     }
   },
   
-  // Add a product review (requires authentication)
-  addProductReview: async (productId, reviewData) => {
+  // Get all reviews (with optional filtering)
+  getReviews: async (params = {}) => {
     try {
-      const response = await api.post(
-        `/reviews`, 
-        { product_id: productId, ...reviewData }
-      );
+      const queryString = new URLSearchParams(params).toString();
+      const response = await api.get(`/reviews${queryString ? `?${queryString}` : ''}`);
       return response.data;
     } catch (error) {
-      console.error(`Error adding review for product ${productId}:`, error);
+      console.error('Error fetching reviews:', error);
+      throw error;
+    }
+  },
+  
+  // Add a product review (requires authentication)
+  addProductReview: async (reviewData) => {
+    try {
+      const response = await api.post('/reviews', reviewData);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding review:', error);
+      throw error;
+    }
+  },
+  
+  // Update a review (requires authentication)
+  updateProductReview: async (reviewId, reviewData) => {
+    try {
+      const response = await api.put(`/reviews/${reviewId}`, reviewData);
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating review ${reviewId}:`, error);
+      throw error;
+    }
+  },
+  
+  // Delete a review (requires authentication)
+  deleteProductReview: async (reviewId) => {
+    try {
+      const response = await api.delete(`/reviews/${reviewId}`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error deleting review ${reviewId}:`, error);
+      throw error;
+    }
+  },
+  
+  // Approve a review (admin only)
+  approveProductReview: async (reviewId) => {
+    try {
+      const response = await api.post(`/admin/reviews/${reviewId}/approve`);
+      return response.data;
+    } catch (error) {
+      console.error(`Error approving review ${reviewId}:`, error);
       throw error;
     }
   },

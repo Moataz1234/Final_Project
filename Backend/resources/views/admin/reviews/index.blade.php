@@ -39,7 +39,7 @@
                                     {{ $review->is_approved ? 'Approved' : 'Pending' }}
                                 </span>
                             </td>
-                            <td>{{ $review->created_at->format('M d, Y') }}</td>
+                            <td>{{ $review->created_at }}</td>
                             <td>
                                 @if(!$review->is_approved)
                                 <form action="{{ route('admin.reviews.approve', $review) }}" method="POST" class="d-inline">
@@ -68,4 +68,6 @@
                 {{ $reviews->links() }}
             </div>
         </div>
- 
+    </div>
+</div>
+@endsection

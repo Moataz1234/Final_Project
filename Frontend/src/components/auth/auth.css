@@ -71,7 +71,7 @@
 
 .input {
   background-color: var(--input-background);
-  color: #fff;
+  /* color: #fff; */
   width: 100%;
   padding: 15px;
   outline: 0;
@@ -82,11 +82,11 @@
 }
 
 .input:focus {
-  border-color: var(--primary-color);
+  /* border-color: var(--primary-color); */
 }
 
 .input-label {
-  color: rgba(255, 255, 255, 0.7);
+  /* color: rgba(255, 255, 255, 0.7); */
   position: absolute;
   left: 15px;
   top: 50%;
